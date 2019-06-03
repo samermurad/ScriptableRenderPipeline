@@ -1,12 +1,25 @@
 using System;
 using System.Collections.Generic;
+using UnityEditor.Experimental.AssetImporters;
 using UnityEditor.Graphing;
 using UnityEngine;
 
 namespace UnityEditor.ShaderGraph
 {
     [Serializable]
-    class SubGraphData : ISerializationCallbackReceiver
+    struct FunctionPair
+    {
+        public string key;
+        public string value;
+
+        public FunctionPair(string key, string value)
+        {
+            this.key = key;
+            this.value = value;
+        }
+    }
+    
+    class SubGraphAsset : ScriptableObject, ISerializationCallbackReceiver
     {
         public bool isValid;
 
@@ -26,7 +39,7 @@ namespace UnityEditor.ShaderGraph
 
         public string path;
 
-        public List<string> functionNames = new List<string>();
+        public List<FunctionPair> functions = new List<FunctionPair>();
 
         [NonSerialized]
         public List<AbstractShaderProperty> inputs = new List<AbstractShaderProperty>();
@@ -50,37 +63,11 @@ namespace UnityEditor.ShaderGraph
 
         public List<string> descendents = new List<string>();
 
-        public List<string> ancestors = new List<string>();
-
+        public ShaderStageCapability effectiveShaderStage;
+        
         public ConcretePrecision graphPrecision;
 
         public ConcretePrecision outputPrecision;
-
-        public ShaderStageCapability effectiveShaderStage;
-
-        public void Reset()
-        {
-            isValid = true;
-            isRecursive = false;
-            processedAt = 0;
-            functionName = null;
-            inputStructName = null;
-            hlslName = null;
-            assetGuid = null;
-            requirements = ShaderGraphRequirements.none;
-            path = null;
-            functionNames.Clear();
-            inputs.Clear();
-            m_SerializedInputs.Clear();
-            nodeProperties.Clear();
-            m_SerializedProperties.Clear();
-            outputs.Clear();
-            m_SerializedOutputs.Clear();
-            children.Clear();
-            descendents.Clear();
-            ancestors.Clear();
-            effectiveShaderStage = ShaderStageCapability.All;
-        }
         
         public void OnBeforeSerialize()
         {
