@@ -90,7 +90,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                 }
                 else
                 {
-                    var title = node.subGraphData.path.Split('/').ToList();
+                    var title = node.asset.path.Split('/').ToList();
                     title.Add(asset.name);
                     AddEntries(node, title.ToArray(), nodeEntries);
                 }
