@@ -400,6 +400,8 @@ CBSDF EvaluateBSDF(float3 V, float3 L, PreLightData preLightData, BSDFData bsdfD
 // Surface shading (all light types) below
 //-----------------------------------------------------------------------------
 
+// Hair used precomputed transmittance, no thick transmittance required
+#define MATERIAL_INCLUDE_PRECOMPUTED_TRANSMISSION
 #include "Packages/com.unity.render-pipelines.high-definition/Runtime/Lighting/LightEvaluation.hlsl"
 #include "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/MaterialEvaluation.hlsl"
 #include "Packages/com.unity.render-pipelines.high-definition/Runtime/Lighting/SurfaceShading.hlsl"

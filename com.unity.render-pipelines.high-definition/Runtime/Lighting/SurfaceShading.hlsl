@@ -1,4 +1,6 @@
 // Continuation of LightEvaluation.hlsl.
+// use #define MATERIAL_INCLUDE_TRANSMISSION to include thick transmittance evaluation
+// use #define MATERIAL_INCLUDE_PRECOMPUTED_TRANSMISSION to apply pre-computed transmittance (or thin transmittance only)
 // use #define OVERRIDE_SHOULD_EVALUATE_THICK_OBJECT_TRANSMISSION to provide a new version of ShouldEvaluateThickObjectTransmission
 //-----------------------------------------------------------------------------
 // Directional and punctual lights (infinitesimal solid angle)
@@ -36,7 +38,7 @@ DirectLighting ShadeSurface_Infinitesimal(PreLightData preLightData, BSDFData bs
     {
         CBSDF cbsdf = EvaluateBSDF(V, L, preLightData, bsdfData);
 
-#ifdef MATERIAL_INCLUDE_TRANSMISSION
+#if defined(MATERIAL_INCLUDE_TRANSMISSION) || defined(MATERIAL_INCLUDE_PRECOMPUTED_TRANSMISSION)
         float3 transmittance = bsdfData.transmittance;
 #else
         float3 transmittance = float3(0.0, 0.0, 0.0);
@@ -80,35 +82,18 @@ DirectLighting ShadeSurface_Directional(LightLoopContext lightLoopContext,
         float4 lightColor = EvaluateLight_Directional(lightLoopContext, posInput, light);
         lightColor.rgb *= lightColor.a; // Composite
 
+#ifdef MATERIAL_INCLUDE_TRANSMISSION
         if (ShouldEvaluateThickObjectTransmission(V, L, preLightData, bsdfData, light.shadowIndex))
         {
             // Transmission through thick objects does not support shadowing
             // from directional lights. It will use the 'baked' transmittance value.
         }
         else
+#endif
         {
-            #ifdef MATERIAL_INCLUDE_TRANSMISSION
-            // If we have transmission and transmittance is non zero here it mean we are thin transmission
-            bool isThinTransmission = Max3(bsdfData.transmittance.r, bsdfData.transmittance.g, bsdfData.transmittance.b) > 0.0;
-            #else
-            bool isThinTransmission = false;
-            #endif
-
-            float shadow = 1.0;
-            // For thin transmission we don't want micro shadow, contact shadow or baked shadows.
-            if (isThinTransmission)
-            {
-                // This will disable contact shadow and shadow mask
-                light.contactShadowMask = 0;
-                light.shadowMaskSelector.x = -1;
-            }
-            else
-            {
-                shadow = ComputeMicroShadowing(GetAmbientOcclusionForMicroShadowing(bsdfData), abs(dot(bsdfData.normalWS, L)), _MicroShadowOpacity);
-            }
-            // This code works for both surface reflection and thin object transmission.
-            shadow *= EvaluateShadow_Directional(lightLoopContext, posInput, light, builtinData, GetNormalForShadowBias(bsdfData));
-            
+            float shadow = EvaluateShadow_Directional(lightLoopContext, posInput, light, builtinData, GetNormalForShadowBias(bsdfData));
+            shadow *= ComputeMicroShadowing(GetAmbientOcclusionForMicroShadowing(bsdfData), abs(dot(bsdfData.normalWS, L)), _MicroShadowOpacity);
+      
             lightColor.rgb *= ComputeShadowColor(shadow, light.shadowTint);
         }
 
@@ -185,34 +170,18 @@ DirectLighting ShadeSurface_Punctual(LightLoopContext lightLoopContext,
         float4 lightColor = EvaluateLight_Punctual(lightLoopContext, posInput, light, L, distances);
         lightColor.rgb *= lightColor.a; // Composite
 
+#ifdef MATERIAL_INCLUDE_TRANSMISSION
         if (ShouldEvaluateThickObjectTransmission(V, L, preLightData, bsdfData, light.shadowIndex))
         {
-            #ifdef MATERIAL_INCLUDE_TRANSMISSION
             // Replace the 'baked' value using 'thickness from shadow'.
             bsdfData.transmittance = EvaluateTransmittance_Punctual(lightLoopContext, posInput,
                                                                     bsdfData, light, L, distances);
-            #endif
         }
         else
+#endif
         {
-            #ifdef MATERIAL_INCLUDE_TRANSMISSION
-            // If we have transmission and transmittance is non zero here it mean we are thin transmission
-            bool isThinTransmission = Max3(bsdfData.transmittance.r, bsdfData.transmittance.g, bsdfData.transmittance.b) > 0.0;
-            #else
-            bool isThinTransmission = false;
-            #endif
-
-            float shadow = 1.0;
-            // For thin transmission we don't want contact shadow or baked shadows.
-            if (isThinTransmission)
-            {
-                // This will disable contact shadow and shadow mask
-                light.contactShadowMask = 0;
-                light.shadowMaskSelector.x = -1;
-            }
-
             // This code works for both surface reflection and thin object transmission.
-            shadow = EvaluateShadow_Punctual(lightLoopContext, posInput, light, builtinData, GetNormalForShadowBias(bsdfData), L, distances);
+            float shadow = EvaluateShadow_Punctual(lightLoopContext, posInput, light, builtinData, GetNormalForShadowBias(bsdfData), L, distances);
             lightColor.rgb *= ComputeShadowColor(shadow, light.shadowTint);
 
 #ifdef DEBUG_DISPLAY
