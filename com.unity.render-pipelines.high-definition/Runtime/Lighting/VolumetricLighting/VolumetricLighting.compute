@@ -29,8 +29,8 @@
     #define USE_BIG_TILE_LIGHTLIST
 #endif
 
-// Don't want contact shadows. This is the only way that works. :-(
-#define _SURFACE_TYPE_TRANSPARENT
+// Don't want contact shadows
+#define LIGHT_EVALUATION_NO_CONTACT_SHADOWS // To define before LightEvaluation.hlsl
 
 #ifdef VL_PRESET_MQ
     // E.g. for 1080p: (1920/8)x(1080/8)x(64)  =  2,073,600 voxels
