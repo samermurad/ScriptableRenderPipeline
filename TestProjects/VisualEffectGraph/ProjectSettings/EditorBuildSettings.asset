@@ -86,7 +86,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/AllTests/VFXTests/GraphicsTests/23_InvertTRSMatrix.unity
     guid: 097d99c9737f88f4882c658cbe58367b
-  - enabled: 1
+  - enabled: 0
     path: Assets/AllTests/VFXTests/GraphicsTests/24_MotionVector.unity
     guid: b7bd5c3eedf5fbe429c82ce9acaa135a
   - enabled: 1
@@ -134,6 +134,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/AllTests/VFXTests/GraphicsTests/GradientMapped.unity
     guid: 56d69bce6c4697147823f3b5b3acd8ea
+  - enabled: 1
     path: Assets/AllTests/VFXTests/GraphicsTests/SubgraphContexts.unity
     guid: df4a078e6e8404b4d953f8cdc87c0aa8
   - enabled: 1
