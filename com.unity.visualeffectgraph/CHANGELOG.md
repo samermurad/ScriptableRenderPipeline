@@ -14,7 +14,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Initial Event Name inspector for visual effect asset and component
 - Subgraphs
 - Move HDRP outputs to HDRP package + expose HDRP queue selection
-- Add exposure weight control for HDRP outputs
+- Exposure weight control for HDRP outputs
+- Motion Vector support
 
 ## [6.7.0-preview] - 2019-05-16
 ### Added
