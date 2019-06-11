@@ -22,6 +22,7 @@ namespace UnityEditor.VFX
 
         // Caps
         public virtual bool supportsExposure { get { return true; } }
+        public virtual bool supportsMotionVector { get { return false; } }
 
         public virtual string GetBlendModeStr()
         {
@@ -53,6 +54,11 @@ namespace UnityEditor.VFX
                 default:
                     throw new NotImplementedException("Unknown blend mode");
             }
+        }
+
+        public virtual IEnumerable<KeyValuePair<string, VFXShaderWriter>> GetStencilStateOverridesStr()
+        {
+            return Enumerable.Empty<KeyValuePair<string, VFXShaderWriter>>();
         }
     }
 }

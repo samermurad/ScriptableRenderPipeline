@@ -101,11 +101,11 @@ namespace UnityEditor.VFX
 
         protected virtual void WriteBlendMode(VFXShaderWriter writer)
         {
-            if (hasMotionVector && !isBlendModeOpaque)
-                writer.WriteLine("Blend 1 Off"); //Disable blending for velocity target in forward
             var blendModeStr = subOutput.GetBlendModeStr();
             if (!string.IsNullOrEmpty(blendModeStr))
                 writer.WriteLine(blendModeStr);
+            if (hasMotionVector && !isBlendModeOpaque)
+                writer.WriteLine("Blend 1 Off"); //Disable blending for velocity target in forward
         }
 
         [SerializeField]

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.Experimental.Rendering.HDPipeline;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering.HDPipeline;
 
@@ -18,6 +19,7 @@ namespace UnityEditor.VFX
 
         // Caps
         public override bool supportsExposure { get { return true; } }
+        public override bool supportsMotionVector { get { return true; } }
 
         protected override IEnumerable<string> filteredOutSettings
         {
@@ -64,6 +66,29 @@ namespace UnityEditor.VFX
 
             int renderQueue = HDRenderQueue.ChangeType(renderQueueType, 0, owner.blendMode == BlendMode.Masked) - (int)(owner.isBlendModeOpaque ? Priority.Opaque : Priority.Transparent);
             return prefix + renderQueue.ToString("+#;-#;+0");
+        }
+
+        //TODO : extend & factorize this method
+        public static void GetStencilStateForDepthOrMV(bool receiveDecals, bool receiveSSR, bool useObjectVelocity, out int stencilWriteMask, out int stencilRef)
+        {
+            stencilWriteMask = (int)UnityEngine.Experimental.Rendering.HDPipeline.HDRenderPipeline.StencilBitMask.DecalsForwardOutputNormalBuffer;
+            stencilRef = receiveDecals ? (int)UnityEngine.Experimental.Rendering.HDPipeline.HDRenderPipeline.StencilBitMask.DecalsForwardOutputNormalBuffer : 0;
+
+            stencilWriteMask |= (int)UnityEngine.Experimental.Rendering.HDPipeline.HDRenderPipeline.StencilBitMask.DoesntReceiveSSR;
+            stencilRef |= !receiveSSR ? (int)UnityEngine.Experimental.Rendering.HDPipeline.HDRenderPipeline.StencilBitMask.DoesntReceiveSSR : 0;
+
+            stencilWriteMask |= useObjectVelocity ? (int)UnityEngine.Experimental.Rendering.HDPipeline.HDRenderPipeline.StencilBitMask.ObjectMotionVectors : 0;
+            stencilRef |= useObjectVelocity ? (int)UnityEngine.Experimental.Rendering.HDPipeline.HDRenderPipeline.StencilBitMask.ObjectMotionVectors : 0;
+        }
+
+        public override IEnumerable<KeyValuePair<string, VFXShaderWriter>> GetStencilStateOverridesStr()
+        {
+            //TODO : Add GBuffer & Distorsion stencil
+            int stencilWriteMask, stencilRef;
+            GetStencilStateForDepthOrMV(false, false, true, out stencilWriteMask, out stencilRef);
+            var stencilForMV = new VFXShaderWriter();
+            stencilForMV.WriteFormat("Stencil\n{{\n WriteMask {0}\n Ref {1}\n Comp Always\n Pass Replace\n}}", stencilWriteMask, stencilRef);
+            yield return new KeyValuePair<string, VFXShaderWriter>("${VFXStencilMotionVector}", stencilForMV);
         }
     }
 }
