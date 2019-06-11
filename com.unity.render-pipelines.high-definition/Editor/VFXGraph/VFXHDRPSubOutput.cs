@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.Experimental.Rendering.HDPipeline;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering.HDPipeline;
-
+using UnityEngine.Experimental.VFX;
 using static UnityEditor.VFX.VFXAbstractRenderedOutput;
 using static UnityEngine.Experimental.Rendering.HDPipeline.HDRenderQueue;
 
@@ -17,9 +16,11 @@ namespace UnityEditor.VFX
         [VFXSetting(VFXSettingAttribute.VisibleFlags.InInspector), Header("HDRP")]
         public TransparentRenderQueue transparentRenderQueue = TransparentRenderQueue.Default;
 
+        private static readonly bool vfxManagerSupportsProcessCameraCommand = typeof(VFXManager).GetMethod("ProcessCameraCommand") != null;
+
         // Caps
-        public override bool supportsExposure { get { return true; } }
-        public override bool supportsMotionVector { get { return true; } }
+        public override bool supportsExposure { get { return true; } } 
+        public override bool supportsMotionVector { get { return vfxManagerSupportsProcessCameraCommand; } }
 
         protected override IEnumerable<string> filteredOutSettings
         {

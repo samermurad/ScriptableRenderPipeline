@@ -21,7 +21,7 @@ namespace UnityEditor.VFX
         public VFXAbstractRenderedOutput owner => m_Owner;
 
         // Caps
-        public virtual bool supportsExposure { get { return true; } }
+        public virtual bool supportsExposure { get { return false; } }
         public virtual bool supportsMotionVector { get { return false; } }
 
         public virtual string GetBlendModeStr()

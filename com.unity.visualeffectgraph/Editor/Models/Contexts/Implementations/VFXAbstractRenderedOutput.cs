@@ -26,7 +26,7 @@ namespace UnityEditor.VFX
 
         public bool isBlendModeOpaque { get { return blendMode == BlendMode.Opaque || blendMode == BlendMode.Masked; } }
 
-        public virtual bool hasMotionVector { get { return supportsMotionVector && generateMotionVector; } }
+        public virtual bool hasMotionVector { get { return subOutput.supportsMotionVector && supportsMotionVector && generateMotionVector; } }
 
         public virtual bool supportsMotionVector { get { return false; } }
 
