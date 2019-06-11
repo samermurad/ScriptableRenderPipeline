@@ -237,6 +237,7 @@ void GetPunctualLightVectors(float3 positionWS, LightData light, out float3 L, o
 float4 EvaluateCookie_Punctual(LightLoopContext lightLoopContext, LightData light,
                                float3 lightToSample)
 {
+#ifndef LIGHT_EVALUATION_NO_COOKIE
     int lightType = light.lightType;
 
     // Translate and rotate 'positionWS' into the light space.
@@ -263,8 +264,33 @@ float4 EvaluateCookie_Punctual(LightLoopContext lightLoopContext, LightData ligh
 
         // Manually clamp to border (black).
         cookie.rgb = SampleCookie2D(lightLoopContext, positionNDC, light.cookieIndex, false);
-        cookie.a   = isInBounds ? 1 : 0;
+        cookie.a   = isInBounds ? 1.0 : 0.0;
     }
+
+#else
+
+    // When we disable cookie, we must still perform border attenuation for pyramid and box
+    // as by default we always bind a cookie white texture for them to mimic it.
+    float4 cookie = float4(1.0, 1.0, 1.0, 1.0);
+
+    int lightType = light.lightType;
+
+    if (lightType == GPULIGHTTYPE_PROJECTOR_PYRAMID || lightType == GPULIGHTTYPE_PROJECTOR_BOX)
+    { 
+        // Translate and rotate 'positionWS' into the light space.
+        // 'light.right' and 'light.up' are pre-scaled on CPU.
+        float3x3 lightToWorld = float3x3(light.right, light.up, light.forward);
+        float3 positionLS     = mul(lightToSample, transpose(lightToWorld));
+
+        // Perform orthographic or perspective projection.
+        float  perspectiveZ = (lightType != GPULIGHTTYPE_PROJECTOR_BOX) ? positionLS.z : 1.0;
+        float2 positionCS   = positionLS.xy / perspectiveZ;
+        bool   isInBounds   = Max3(abs(positionCS.x), abs(positionCS.y), 1.0 - positionLS.z) <= 1.0;
+
+        // Manually clamp to border (black).
+        cookie.a = isInBounds ? 1.0 : 0.0;
+    }
+#endif
 
     return cookie;
 }
@@ -293,8 +319,9 @@ float4 EvaluateLight_Punctual(LightLoopContext lightLoopContext, PositionInputs 
     }
 #endif
 
-#ifndef LIGHT_EVALUATION_NO_COOKIE
-    // Projector lights always have cookies, so we can perform clipping inside the if().
+    // Projector lights (box, pyramid) always have cookies, so we can perform clipping inside the if().
+    // Thus why we don't disable the code here based on LIGHT_EVALUATION_NO_COOKIE but we do it
+    // inside the EvaluateCookie_Punctual call
     if (light.cookieIndex >= 0)
     {
         float3 lightToSample = posInput.positionWS - light.positionRWS;
@@ -302,7 +329,6 @@ float4 EvaluateLight_Punctual(LightLoopContext lightLoopContext, PositionInputs 
 
         color *= cookie;
     }
-#endif
 
     return color;
 }
