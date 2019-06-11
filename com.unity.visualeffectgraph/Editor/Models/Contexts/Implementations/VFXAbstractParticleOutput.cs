@@ -331,7 +331,7 @@ namespace UnityEditor.VFX
                 if (!supportsUV)
                     yield return "uvMode";
 
-                if (!supportsMotionVector)
+                if (!implementsMotionVector || !subOutput.supportsMotionVector)
                     yield return "generateMotionVector";
 
                 if (isBlendModeOpaque)

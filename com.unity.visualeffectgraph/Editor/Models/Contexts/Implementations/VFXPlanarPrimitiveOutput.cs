@@ -29,7 +29,7 @@ namespace UnityEditor.VFX
             }
         }
         public override bool supportsUV { get { return true; } }
-        public override bool supportsMotionVector { get { return subOutput.supportsMotionVector; } }
+        public override bool implementsMotionVector { get { return true; } }
 
         public override IEnumerable<string> additionalDefines
         {
