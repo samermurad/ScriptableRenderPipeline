@@ -51,7 +51,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 if (asset.isDefault)
                     names = Enumerable.Repeat("default", 1).Union(names);
 
-                m_Element.text = $"{asset.asset.name} in {string.Join(",", names.ToArray())}";
+                m_Element.text = $"{asset.asset.name} in {string.Join(", ", names.ToArray())}";
 
                 RemoveFromClassList("even");
                 RemoveFromClassList("odd");
@@ -96,7 +96,12 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                     if (index >= 0)
                         m_HDRPAssets[index].indices.Add(i);
                     else
-                        m_HDRPAssets.Add(new HDRPAssetLocations(false, hdrp2));
+                    {
+                        var loc = new HDRPAssetLocations(false, hdrp2);
+                        loc.indices.Add(i);
+                        m_HDRPAssets.Add(loc);
+                    }
+
                 }
 
                 // title
