@@ -202,7 +202,14 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
         {
             using (new EditorGUI.DisabledScope(!HDUtils.hdrpSettings.supportLightLayers))
             {
-                HDEditorUtils.LightLayerMaskPropertyDrawer(s_Styles.lightLayer, serialized.serializedLightData.renderingLayerMask);
+                using (var change = new EditorGUI.ChangeCheckScope())
+                {
+                    HDEditorUtils.LightLayerMaskPropertyDrawer(s_Styles.lightLayer, serialized.serializedLightData.lightlayersMask);
+
+                    // If we're not in decoupled mode for light layers, we sync light with shadow layers:
+                    if (serialized.serializedLightData.linkLightLayers.boolValue && change.changed)
+                        SyncLightAndShadowLayers(serialized, owner);
+                }
             }
         }
 
@@ -215,9 +222,6 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             switch (serialized.editorLightShape)
             {
                 case LightShape.Directional:
-                    // Sun disk.
-                    EditorGUILayout.Slider(serialized.serializedLightData.sunDiskSize, 0f, 45f, s_Styles.sunDiskSize);
-                    EditorGUILayout.Slider(serialized.serializedLightData.sunHaloSize, 0f, 1f, s_Styles.sunHaloSize);
                     EditorGUILayout.PropertyField(serialized.serializedLightData.maxSmoothness, s_Styles.maxSmoothness);
                     break;
 
@@ -586,6 +590,12 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 if(LightShape.Rectangle == serialized.editorLightShape)
                 {
                     EditorGUILayout.PropertyField(serialized.serializedLightData.useRayTracedShadows, s_Styles.useRayTracedShadows);
+                    if(serialized.serializedLightData.useRayTracedShadows.boolValue)
+                    {
+                        EditorGUILayout.PropertyField(serialized.serializedLightData.numRayTracingSamples, s_Styles.numRayTracingSamples);
+                        EditorGUILayout.PropertyField(serialized.serializedLightData.filterTracedShadow, s_Styles.filterTracedShadow);
+                        EditorGUILayout.PropertyField(serialized.serializedLightData.filterSizeTraced, s_Styles.filterSizeTraced);
+                    }
                 }
                 if (!serialized.serializedLightData.useRayTracedShadows.boolValue || LightShape.Rectangle != serialized.editorLightShape)
 #endif
@@ -618,7 +628,6 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                     {
                         EditorGUILayout.Slider(serialized.serializedShadowData.viewBiasScale, 0.0f, 15.0f, s_Styles.viewBiasScale);
                     }
-
                 }
 
             }
@@ -662,13 +671,47 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
 
                 }
 
-                EditorGUILayout.Slider(serialized.serializedShadowData.shadowDimmer, 0.0f, 1.0f, s_Styles.shadowDimmer);
+                // Dimmer and Tint don't have effect on baked shadow
+                if (!serialized.settings.isCompletelyBaked)
+                {
+                    EditorGUILayout.Slider(serialized.serializedShadowData.shadowDimmer, 0.0f, 1.0f, s_Styles.shadowDimmer);
+                    EditorGUILayout.PropertyField(serialized.serializedShadowData.shadowTint, s_Styles.shadowTint);
+                }                
 
                 if (serialized.settings.lightType.enumValueIndex != (int)LightType.Directional)
                 {
                     EditorGUILayout.PropertyField(serialized.serializedShadowData.fadeDistance, s_Styles.shadowFadeDistance);
                 }
+
+                // Shadow Layers
+                using (new EditorGUI.DisabledScope(!HDUtils.hdrpSettings.supportLightLayers))
+                {
+                    using (var change = new EditorGUI.ChangeCheckScope())
+                    {
+                        EditorGUILayout.PropertyField(serialized.serializedLightData.linkLightLayers, s_Styles.linkLightAndShadowLayersText);
+
+                        // Undo the changes in the light component because the SyncLightAndShadowLayers will change the value automatically when link is ticked
+                        if (change.changed)
+                            Undo.RecordObjects(owner.targets, "Undo Light Layers Changed");
+                    }
+                    if (!serialized.serializedLightData.linkLightLayers.hasMultipleDifferentValues)
+                    {
+                        using (new EditorGUI.DisabledGroupScope(serialized.serializedLightData.linkLightLayers.boolValue))
+                        {
+                            HDEditorUtils.LightLayerMaskPropertyDrawer(s_Styles.shadowLayerMaskText, serialized.settings.renderingLayerMask);
+                        }
+                        if (serialized.serializedLightData.linkLightLayers.boolValue)
+                            SyncLightAndShadowLayers(serialized, owner);
+                    }
+                }
             }
+        }
+        
+        static void SyncLightAndShadowLayers(SerializedHDLight serialized, Editor owner)
+        {
+            // If we're not in decoupled mode for light layers, we sync light with shadow layers:
+            foreach (Light target in owner.targets)
+                target.renderingLayerMask = serialized.serializedLightData.lightlayersMask.intValue;
         }
 
         static void DrawContactShadowsContent(SerializedHDLight serialized, Editor owner)

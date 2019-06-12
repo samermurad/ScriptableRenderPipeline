@@ -105,6 +105,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         AfterPostprocess = 17,
         [FrameSettingsField(0, autoName: LowResTransparent)]
         LowResTransparent = 18,
+        [FrameSettingsField(0, displayedName: "ZTest For After PostProcess", tooltip: "When enabled, Cameras that don't use TAA process a depth test for Materials in the AfterPostProcess rendering pass.")]
+        ZTestAfterPostProcessTAA = 19,
 
         //lighting settings from 20 to 39
         [FrameSettingsField(1, autoName: Shadow)]
@@ -149,16 +151,16 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
         //from 60 to 119 : space for new scopes
         // true <=> Fixed, false <=> FromQualitySettings (default)
-        [FrameSettingsField(4, autoName: LODBiasMode, type: FrameSettingsFieldAttribute.DisplayType.Others, targetType: typeof(LODBiasMode))]
+        [FrameSettingsField(0, autoName: LODBiasMode, type: FrameSettingsFieldAttribute.DisplayType.Others, targetType: typeof(LODBiasMode))]
         LODBiasMode = 60,
         /// <summary>Set the LOD Bias with the value in <see cref="FrameSettings.lodBias"/>.</summary>
-        [FrameSettingsField(4, autoName: LODBias, type: FrameSettingsFieldAttribute.DisplayType.Others, positiveDependencies: new[]{ LODBiasMode })]
+        [FrameSettingsField(0, autoName: LODBias, type: FrameSettingsFieldAttribute.DisplayType.Others, positiveDependencies: new[]{ LODBiasMode })]
         LODBias = 61,
         // true <=> Fixed, false <=> FromQualitySettings (default)
-        [FrameSettingsField(4, autoName: MaximumLODLevelMode, type: FrameSettingsFieldAttribute.DisplayType.Others, targetType: typeof(MaximumLODLevelMode))]
+        [FrameSettingsField(0, autoName: MaximumLODLevelMode, type: FrameSettingsFieldAttribute.DisplayType.Others, targetType: typeof(MaximumLODLevelMode))]
         MaximumLODLevelMode = 62,
         /// <summary>Set the LOD Bias with the value in <see cref="FrameSettings.maximumLODLevel"/>.</summary>
-        [FrameSettingsField(4, autoName: MaximumLODLevel, type: FrameSettingsFieldAttribute.DisplayType.Others, positiveDependencies: new[]{ MaximumLODLevelMode })]
+        [FrameSettingsField(0, autoName: MaximumLODLevel, type: FrameSettingsFieldAttribute.DisplayType.Others, positiveDependencies: new[]{ MaximumLODLevelMode })]
         MaximumLODLevel = 63,
 
         //lightLoop settings from 120 to 127
@@ -170,9 +172,9 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         DeferredTile = 122,
         [FrameSettingsField(3, autoName: ComputeLightEvaluation, positiveDependencies: new[] { DeferredTile })]
         ComputeLightEvaluation = 123,
-        [FrameSettingsField(3, autoName: ComputeLightVariants, positiveDependencies: new[] { ComputeLightEvaluation, DeferredTile })]
+        [FrameSettingsField(3, autoName: ComputeLightVariants, positiveDependencies: new[] { DeferredTile })]
         ComputeLightVariants = 124,
-        [FrameSettingsField(3, autoName: ComputeMaterialVariants, positiveDependencies: new[] { ComputeLightEvaluation, DeferredTile })]
+        [FrameSettingsField(3, autoName: ComputeMaterialVariants, positiveDependencies: new[] { DeferredTile })]
         ComputeMaterialVariants = 125,
         Reflection = 126, //set by engine, not for DebugMenu/Inspector
 
@@ -220,6 +222,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                 (uint)FrameSettingsField.Postprocess,
                 (uint)FrameSettingsField.AfterPostprocess,
                 (uint)FrameSettingsField.LowResTransparent,
+                (uint)FrameSettingsField.ZTestAfterPostProcessTAA,
                 (uint)FrameSettingsField.OpaqueObjects,
                 (uint)FrameSettingsField.TransparentObjects,
                 (uint)FrameSettingsField.RealtimePlanarReflection,
