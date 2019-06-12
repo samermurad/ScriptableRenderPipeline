@@ -358,7 +358,7 @@ namespace UnityEditor.ShaderGraph.Drawing
         void SetStickyNotePosition(StickyNote stickyNote)
         {
             var pos = stickyNote.GetPosition();
-            stickyNote.userData.position = new Vector2(pos.x, pos.y);
+            stickyNote.userData.position = new Rect(pos);
         }
 
         void OnGroupTitleChanged(Group graphGroup, string title)
@@ -399,14 +399,14 @@ namespace UnityEditor.ShaderGraph.Drawing
             }
         }
 
-        void OnElementsRemovedFromGroup(Group graphGroup, IEnumerable<GraphElement> element)
+        void OnElementsRemovedFromGroup(Group graphGroup, IEnumerable<GraphElement> elements)
         {
             if (graphGroup.userData is GroupData groupData)
             {
                 var anyChanged = false;
-                foreach (var nodeView in element.OfType<IShaderNodeView>())
+                foreach (var element in elements)
                 {
-                    if (nodeView.node != null && nodeView.node.groupGuid == groupData.guid)
+                    if (element.userData is IGroupItem groupItem && groupItem.groupGuid == groupData.guid)
                     {
                         anyChanged = true;
                         break;
@@ -418,11 +418,11 @@ namespace UnityEditor.ShaderGraph.Drawing
 
                 m_Graph.owner.RegisterCompleteObjectUndo("Ungroup Node(s)");
 
-                foreach (var nodeView in element.OfType<IShaderNodeView>())
+                foreach (var element in elements)
                 {
-                    if (nodeView.node != null)
+                    if (element.userData is IGroupItem groupItem)
                     {
-                        m_Graph.SetGroup(nodeView.node, null);
+                        m_Graph.SetGroup(groupItem, null);
                         SetGroupPosition((ShaderGroup)graphGroup); //, (GraphElement)nodeView);
                     }
                 }
@@ -715,7 +715,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             stickyNote.textSize = (StickyNote.TextSize)stickyNoteData.textSize;
             stickyNote.theme = (StickyNote.Theme)stickyNoteData.theme;
             stickyNote.userData.groupGuid = stickyNoteData.groupGuid;
-            stickyNote.SetPosition(new Rect(stickyNote.userData.position, new Vector2(200, 125)));
+            stickyNote.SetPosition(new Rect(stickyNote.userData.position));
 
             m_GraphView.AddElement(stickyNote);
 

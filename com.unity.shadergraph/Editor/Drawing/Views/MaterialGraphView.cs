@@ -186,7 +186,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             position = contentViewContainer.WorldToLocal(position);
             string title = "New Note";
             string content = "Write something here";
-            var stickyNoteData  = new StickyNoteData(title, content, position);
+            var stickyNoteData  = new StickyNoteData(title, content, new Rect(position.x, position.y, 200, 160));
             graph.owner.RegisterCompleteObjectUndo("Create Sticky Note");
             graph.AddStickyNote(stickyNoteData);
         }

@@ -226,7 +226,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             title,
             contents,
             theme,
-            textSize
+            textSize,
         }
 
         public Change change {get; protected set; }
@@ -299,6 +299,7 @@ namespace UnityEditor.ShaderGraph.Drawing
 
         public virtual void OnResized()
         {
+            userData.position = new Rect(resolvedStyle.left, resolvedStyle.top, style.width.value.value, style.height.value.value);
         }
 
         Vector2 AllExtraSpace(VisualElement element)
@@ -391,17 +392,16 @@ namespace UnityEditor.ShaderGraph.Drawing
 
         public static readonly Vector2 defaultSize = new Vector2(200, 160);
 
-        public StickyNote(Vector2 position, GraphData graph) : this("UXML/StickyNote", position, graph)
+        public StickyNote(Rect position, GraphData graph) : this("UXML/StickyNote", position, graph)
         {
             styleSheets.Add(Resources.Load<StyleSheet>("Selectable"));
             styleSheets.Add(Resources.Load<StyleSheet>("StickyNote"));
             RegisterCallback<AttachToPanelEvent>(OnAttachToPanel);
         }
 
-        public StickyNote(string uiFile, Vector2 position, GraphData graph)
+        public StickyNote(string uiFile, Rect position, GraphData graph)
         {
             m_Graph = graph;
-
             var tpl = Resources.Load<VisualTreeAsset>(uiFile);
 
             tpl.CloneTree(this);
@@ -417,11 +417,10 @@ namespace UnityEditor.ShaderGraph.Drawing
             m_TitleField = this.Q<TextField>(name: "title-field");
             if (m_TitleField != null)
             {
-                m_TitleField.visible = false;
+                m_TitleField.style.display = DisplayStyle.None;
                 m_TitleField.Q("unity-text-input").RegisterCallback<BlurEvent>(OnTitleBlur);
                 m_TitleField.RegisterCallback<ChangeEvent<string>>(OnTitleChange);
             }
-
 
             m_Contents = this.Q<Label>(name: "contents");
             if (m_Contents != null)
@@ -429,20 +428,20 @@ namespace UnityEditor.ShaderGraph.Drawing
                 m_ContentsField = m_Contents.Q<TextField>(name: "contents-field");
                 if (m_ContentsField != null)
                 {
-                    m_ContentsField.visible = false;
+                    m_ContentsField.style.display = DisplayStyle.None;
                     m_ContentsField.multiline = true;
                     m_ContentsField.Q("unity-text-input").RegisterCallback<BlurEvent>(OnContentsBlur);
                 }
                 m_Contents.RegisterCallback<MouseDownEvent>(OnContentsMouseDown);
             }
 
-            SetPosition(new Rect(position, defaultSize));
+            SetPosition(new Rect(position.x, position.y, defaultSize.x, defaultSize.y));
 
             AddToClassList("sticky-note");
             AddToClassList("selectable");
             UpdateThemeClasses();
             UpdateSizeClasses();
-
+            
             this.AddManipulator(new ContextualMenuManipulator(BuildContextualMenu));
         }
 
@@ -549,7 +548,7 @@ namespace UnityEditor.ShaderGraph.Drawing
         {
             //bool changed = m_Title.text != m_TitleField.value;
             title = m_TitleField.value;
-            m_TitleField.visible = false;
+            m_TitleField.style.display = DisplayStyle.None;
 
             m_Title.UnregisterCallback<GeometryChangedEvent>(OnTitleRelayout);
 
@@ -564,7 +563,7 @@ namespace UnityEditor.ShaderGraph.Drawing
         {
             bool changed = m_Contents.text != m_ContentsField.value;
             m_Contents.text = m_ContentsField.value;
-            m_ContentsField.visible = false;
+            m_ContentsField.style.display = DisplayStyle.None;
 
             //Notify change
             if (changed)
@@ -581,10 +580,9 @@ namespace UnityEditor.ShaderGraph.Drawing
         void UpdateTitleFieldRect()
         {
             Rect rect = m_Title.layout;
-            //if( m_Title != m_TitleField.parent)
             m_Title.parent.ChangeCoordinatesTo(m_TitleField.parent, rect);
 
-            m_TitleField.style.left = rect.xMin /* + m_Title.style.marginLeft*/;
+            m_TitleField.style.left = rect.xMin -1;
             m_TitleField.style.right = rect.yMin + m_Title.resolvedStyle.marginTop;
             m_TitleField.style.width = rect.width - m_Title.resolvedStyle.marginLeft - m_Title.resolvedStyle.marginRight;
             m_TitleField.style.height = rect.height - m_Title.resolvedStyle.marginTop - m_Title.resolvedStyle.marginBottom;
@@ -596,7 +594,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             {
                 m_TitleField.RemoveFromClassList("empty");
                 m_TitleField.value = m_Title.text;
-                m_TitleField.visible = true;
+                m_TitleField.style.display = DisplayStyle.Flex;
                 UpdateTitleFieldRect();
                 m_Title.RegisterCallback<GeometryChangedEvent>(OnTitleRelayout);
 
@@ -636,7 +634,7 @@ namespace UnityEditor.ShaderGraph.Drawing
             if (e.clickCount == 2)
             {
                 m_ContentsField.value = m_Contents.text;
-                m_ContentsField.visible = true;
+                m_ContentsField.style.display = DisplayStyle.Flex;
                 m_ContentsField.Q("unity-text-input").Focus();
                 e.StopPropagation();
                 e.PreventDefault();
