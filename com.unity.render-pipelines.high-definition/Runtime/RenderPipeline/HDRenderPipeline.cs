@@ -1032,7 +1032,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                     //  for various reasons (full screen pass through, custom render, or just invalid parameters)
                     //  and in that case the associated ending call is never called.
                     UnityEngine.Rendering.RenderPipeline.BeginCameraRendering(renderContext, camera);
-                    UnityEngine.Experimental.VFX.VFXManager.ProcessCamera(camera); //Visual Effect Graph is not yet a required package but calling this method when there isn't any VisualEffect component has no effect (but needed for Camera sorting in Visual Effect Graph context)
+                    UnityEngine.VFX.VFXManager.ProcessCamera(camera); //Visual Effect Graph is not yet a required package but calling this method when there isn't any VisualEffect component has no effect (but needed for Camera sorting in Visual Effect Graph context)
 
                     // Reset pooled variables
                     cameraSettings.Clear();
