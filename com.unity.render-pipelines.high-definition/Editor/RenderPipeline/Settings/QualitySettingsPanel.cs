@@ -45,9 +45,13 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 Add(m_Element);
             }
 
-            public void Bind(int index, HDRenderPipelineAsset asset)
+            public void Bind(int index, HDRPAssetLocations asset)
             {
-                m_Element.text = asset.name;
+                var names = asset.indices.Select(i => QualitySettings.names[i]);
+                if (asset.isDefault)
+                    names = Enumerable.Repeat("default", 1).Union(names);
+
+                m_Element.text = $"{asset.asset.name} in {string.Join(",", names.ToArray())}";
 
                 RemoveFromClassList("even");
                 RemoveFromClassList("odd");
@@ -55,19 +59,45 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             }
         }
 
+        struct HDRPAssetLocations
+        {
+            public readonly bool isDefault;
+            public readonly List<int> indices;
+            public readonly HDRenderPipelineAsset asset;
+
+            public HDRPAssetLocations(bool isDefault, HDRenderPipelineAsset asset)
+            {
+                this.asset = asset;
+                this.isDefault = isDefault;
+                this.indices = new List<int>();
+            }
+        }
+
         class QualitySettingsPanelVisualElement : VisualElement
         {
-            HDRenderPipelineAsset[] m_HDRPAssets;
+            List<HDRPAssetLocations> m_HDRPAssets;
             Label m_InspectorTitle;
             ListView m_HDRPAssetList;
             Editor m_Cached;
 
             public QualitySettingsPanelVisualElement(string searchContext)
             {
-                m_HDRPAssets = GraphicsSettings.allConfiguredRenderPipelines
-                    .OfType<HDRenderPipelineAsset>()
-                    .Distinct()
-                    .ToArray();
+                m_HDRPAssets = new List<HDRPAssetLocations>();
+                if (GraphicsSettings.renderPipelineAsset is HDRenderPipelineAsset hdrp)
+                    m_HDRPAssets.Add(new HDRPAssetLocations(true, hdrp));
+
+                var qualityLevelCount = QualitySettings.names.Length;
+                for (var i = 0; i < qualityLevelCount; ++i)
+                {
+                    if (!(QualitySettings.GetRenderPipelineAssetAt(i) is HDRenderPipelineAsset hdrp2))
+                        continue;
+
+                    var index = m_HDRPAssets.FindIndex(a => a.asset == hdrp2);
+                    if (index >= 0)
+                        m_HDRPAssets[index].indices.Add(i);
+                    else
+                        m_HDRPAssets.Add(new HDRPAssetLocations(false, hdrp2));
+                }
 
                 // title
                 var title = new Label()
@@ -115,7 +145,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
 
             void OnSelectionChanged(List<object> obj)
             {
-                m_InspectorTitle.text = m_HDRPAssets[m_HDRPAssetList.selectedIndex].name;
+                m_InspectorTitle.text = m_HDRPAssets[m_HDRPAssetList.selectedIndex].asset.name;
             }
 
             void DrawInspector()
@@ -123,7 +153,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 var selected = m_HDRPAssetList.selectedIndex;
                 if (selected >= 0)
                 {
-                    Editor.CreateCachedEditor(m_HDRPAssets[selected], typeof(HDRenderPipelineEditor), ref m_Cached);
+                    Editor.CreateCachedEditor(m_HDRPAssets[selected].asset, typeof(HDRenderPipelineEditor), ref m_Cached);
                     m_Cached.OnInspectorGUI();
                 }
             }
