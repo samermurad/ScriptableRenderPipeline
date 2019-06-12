@@ -1,0 +1,16 @@
+﻿VisualElement {}
+
+.h1 {
+    font-style: bold;
+    font-size: 16;
+    margin: 2 5 15 5;
+}
+
+/* ========= Quality Settings Panel =========  */
+
+.unity-quality-header-list {
+    margin: 5;
+    border-bottom: 1;
+    border-color: #1F1F1F;
+    flex: 1 0 0;
+}
