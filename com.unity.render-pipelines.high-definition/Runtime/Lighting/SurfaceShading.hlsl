@@ -92,7 +92,8 @@ DirectLighting ShadeSurface_Directional(LightLoopContext lightLoopContext,
 #endif
         {
             float shadow = EvaluateShadow_Directional(lightLoopContext, posInput, light, builtinData, GetNormalForShadowBias(bsdfData));
-            shadow *= ComputeMicroShadowing(GetAmbientOcclusionForMicroShadowing(bsdfData), abs(dot(bsdfData.normalWS, L)), _MicroShadowOpacity);
+            float NdotL  = dot(bsdfData.normalWS, L); // No microshadowing when facing away from light (use for thin transmission as well)
+            shadow *= NdotL >= 0.0 ? ComputeMicroShadowing(GetAmbientOcclusionForMicroShadowing(bsdfData), NdotL, _MicroShadowOpacity) : 1.0;
       
             lightColor.rgb *= ComputeShadowColor(shadow, light.shadowTint);
         }
