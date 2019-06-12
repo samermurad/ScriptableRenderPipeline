@@ -78,6 +78,8 @@ namespace UnityEditor.ShaderGraph.Drawing
             base.BuildContextualMenu(evt);
             if (evt.target is GraphView || evt.target is Node)
             {
+                InitializeViewSubMenu(evt);
+
                 evt.menu.AppendAction("Convert To Sub-graph", ConvertToSubgraph, ConvertToSubgraphStatus);
                 evt.menu.AppendAction("Convert To Inline Node", ConvertToInlineNode, ConvertToInlineNodeStatus);
                 evt.menu.AppendAction("Convert To Property", ConvertToProperty, ConvertToPropertyStatus);
@@ -130,7 +132,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                         return DropdownMenuAction.Status.Disabled;
                 });
 
-                InitializeViewSubMenu(evt);
+                
 
                 var editorView = GetFirstAncestorOfType<GraphEditorView>();
                 if (editorView.colorManager.activeSupportsCustom && selection.OfType<MaterialNodeView>().Any())
@@ -185,19 +187,24 @@ namespace UnityEditor.ShaderGraph.Drawing
 
         private void InitializeViewSubMenu(ContextualMenuPopulateEvent evt)
         {
+            // Default the menu buttons to disabled
             DropdownMenuAction.Status expandPreviewAction = DropdownMenuAction.Status.Disabled;
             DropdownMenuAction.Status collapsePreviewAction = DropdownMenuAction.Status.Disabled;
+            DropdownMenuAction.Status minimizeAction = DropdownMenuAction.Status.Disabled;
+            DropdownMenuAction.Status maximizeAction = DropdownMenuAction.Status.Disabled;
+
+            // Initialize strings
             string expandPreviewText = "View/Expand Previews";
             string collapsePreviewText = "View/Collapse Previews";
+            string expandPortText = "View/Expand Ports";
+            string collapsePortText = "View/Collapse Ports";
             if (selection.Count == 1)
             {
                 collapsePreviewText = "View/Collapse Preview";
                 expandPreviewText = "View/Expand Preview";
             }
 
-            DropdownMenuAction.Status minimizeAction = DropdownMenuAction.Status.Disabled;
-            DropdownMenuAction.Status maximizeAction = DropdownMenuAction.Status.Disabled;
-
+            // Check if we can expand or collapse the ports/previews
             foreach (MaterialNodeView selectedNode in selection.Where(x => x is MaterialNodeView).Select(x => x as MaterialNodeView))
             {
                 if (selectedNode.node.hasPreview)
@@ -208,17 +215,25 @@ namespace UnityEditor.ShaderGraph.Drawing
                         expandPreviewAction = DropdownMenuAction.Status.Normal;
                 }
 
-                if (selectedNode.expanded)
-                    minimizeAction = DropdownMenuAction.Status.Normal;
-                else
-                    maximizeAction = DropdownMenuAction.Status.Normal;
+                if (selectedNode.CanToggleExpanded())
+                {
+                    if (selectedNode.expanded)
+                        minimizeAction = DropdownMenuAction.Status.Normal;
+                    else
+                        maximizeAction = DropdownMenuAction.Status.Normal;
+                }
             }
 
-            evt.menu.AppendAction("View/Minimize", _ => SetNodeExpandedOnSelection(false), (a) => minimizeAction);
-            evt.menu.AppendAction("View/Maximize", _ => SetNodeExpandedOnSelection(true), (a) => maximizeAction);
+            // Create the menu options
+            evt.menu.AppendAction(collapsePortText, _ => SetNodeExpandedOnSelection(false), (a) => minimizeAction);
+            evt.menu.AppendAction(expandPortText, _ => SetNodeExpandedOnSelection(true), (a) => maximizeAction);
+
+            evt.menu.AppendSeparator("View/");
 
             evt.menu.AppendAction(expandPreviewText, _ => SetPreviewExpandedOnSelection(true), (a) => expandPreviewAction);
             evt.menu.AppendAction(collapsePreviewText, _ => SetPreviewExpandedOnSelection(false), (a) => collapsePreviewAction);
+
+            evt.menu.AppendSeparator();
         }
 
         void ChangeCustomNodeColor(DropdownMenuAction menuAction)
@@ -299,7 +314,8 @@ namespace UnityEditor.ShaderGraph.Drawing
             graph.owner.RegisterCompleteObjectUndo("Toggle Expansion");
             foreach (MaterialNodeView selectedNode in selection.Where(x => x is MaterialNodeView).Select(x => x as MaterialNodeView))
             {
-                selectedNode.expanded = state;
+                if(selectedNode.CanToggleExpanded())
+                    selectedNode.expanded = state;
             }
         }
 

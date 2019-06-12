@@ -473,6 +473,11 @@ namespace UnityEditor.ShaderGraph.Drawing
             }
         }
 
+        public bool CanToggleExpanded()
+        {
+            return m_CollapseButton.enabledInHierarchy;
+        }
+
         void UpdatePreviewExpandedState(bool expanded)
         {
             node.previewExpanded = expanded;
