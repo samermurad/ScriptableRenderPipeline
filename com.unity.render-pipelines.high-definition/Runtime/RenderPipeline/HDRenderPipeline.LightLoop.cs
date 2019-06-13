@@ -45,6 +45,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         {
             public BuildGPULightListParameters buildGPULightListParameters;
             public BuildGPULightListResources buildGPULightListResources;
+            public LightLoopGlobalParameters lightLoopGlobalParameters;
             public RenderGraphResource depthBuffer;
             public RenderGraphResource stencilTexture;
         }
@@ -57,9 +58,10 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
                 passData.buildGPULightListParameters = PrepareBuildGPULightListParameters(hdCamera);
                 // TODO: Move this inside the render function onces compute buffers are RenderGraph ready
-                passData.buildGPULightListResources = PrepareBuildGPULightListResources(null, null);
+                passData.buildGPULightListResources = PrepareBuildGPULightListResources(m_TileAndClusterData, null, null);
                 passData.depthBuffer = builder.ReadTexture(depthStencilBuffer);
                 passData.stencilTexture = builder.ReadTexture(stencilBufferCopy);
+                passData.lightLoopGlobalParameters = PrepareLightLoopGlobalParameters(hdCamera);
 
                 builder.SetRenderFunc(
                 (BuildGPULightListPassData data, RenderGraphContext context) =>
@@ -75,6 +77,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                     VoxelLightListGeneration(data.buildGPULightListParameters, data.buildGPULightListResources, context.cmd);
 
                     BuildDispatchIndirectArguments(data.buildGPULightListParameters, data.buildGPULightListResources, tileFlagsWritten, context.cmd);
+
+                    PushLightLoopGlobalParams(data.lightLoopGlobalParameters, context.cmd);
                 });
 
             }
@@ -106,10 +110,13 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             }
         }
 
-        void RenderShadows(RenderGraph renderGraph, HDCamera hdCamera, CullingResults cullResults)
+        internal ShadowResult RenderShadows(RenderGraph renderGraph, HDCamera hdCamera, CullingResults cullResults)
         {
-            m_ShadowManager.RenderShadows(m_RenderGraph, hdCamera, cullResults);
+            var result = m_ShadowManager.RenderShadows(m_RenderGraph, hdCamera, cullResults);
+
+            // TODO: Remove this once shadows don't pollute global parameters anymore.
             PushGlobalCameraParams(renderGraph, hdCamera);
+            return result;
         }
 
         RenderGraphMutableResource CreateDiffuseLightingBuffer(RenderGraph renderGraph, bool msaa)
@@ -129,7 +136,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             public RenderGraphResource          depthBuffer;
             public RenderGraphResource          depthTexture;
 
-            public RenderGraphResource[]        gBuffer = new RenderGraphResource[8];
+            public int                          gbufferCount;
+            public RenderGraphResource[]        gbuffer = new RenderGraphResource[8];
         }
 
         struct LightingOutput
@@ -137,7 +145,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             public RenderGraphMutableResource colorBuffer;
         }
 
-        LightingOutput RenderDeferredLighting(RenderGraph renderGraph, HDCamera hdCamera, RenderGraphMutableResource colorBuffer, RenderGraphMutableResource diffuseLightingBuffer, GBufferOutput gbuffer)
+        LightingOutput RenderDeferredLighting(RenderGraph renderGraph, HDCamera hdCamera, RenderGraphMutableResource colorBuffer, RenderGraphMutableResource diffuseLightingBuffer, in GBufferOutput gbuffer, in ShadowResult shadowResult)
         {
             if (hdCamera.frameSettings.litShaderMode != LitShaderMode.Deferred)
                 return new LightingOutput();
@@ -148,10 +156,10 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
                 // TODO: Move this inside the render function onces compute buffers are RenderGraph ready
                 passData.resources = new  DeferredLightingResources();
-                passData.resources.lightListBuffer = s_LightList;
-                passData.resources.tileFeatureFlagsBuffer = s_TileFeatureFlags;
-                passData.resources.tileListBuffer = s_TileList;
-                passData.resources.dispatchIndirectBuffer = s_DispatchIndirectBuffer;
+                passData.resources.lightListBuffer = m_TileAndClusterData.lightList;
+                passData.resources.tileFeatureFlagsBuffer = m_TileAndClusterData.tileFeatureFlags;
+                passData.resources.tileListBuffer = m_TileAndClusterData.tileList;
+                passData.resources.dispatchIndirectBuffer = m_TileAndClusterData.dispatchIndirectBuffer;
 
                 passData.colorBuffer = builder.WriteTexture(colorBuffer);
                 if (passData.parameters.outputSplitLighting)
@@ -161,8 +169,11 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                 passData.depthBuffer = builder.ReadTexture(GetDepthStencilBuffer());
                 passData.depthTexture = builder.ReadTexture(GetDepthTexture());
 
+                passData.gbufferCount = gbuffer.gbuffer.Length;
                 for (int i = 0; i < gbuffer.gbuffer.Length; ++i)
-                    passData.gBuffer[i] = builder.ReadTexture(gbuffer.gbuffer[i]);
+                    passData.gbuffer[i] = builder.ReadTexture(gbuffer.gbuffer[i]);
+
+                HDShadowManager.ReadShadowResult(builder, shadowResult);
 
                 var output = new LightingOutput();
                 output.colorBuffer = passData.colorBuffer;
@@ -178,8 +189,10 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                     data.resources.depthTexture = context.resources.GetTexture(data.depthTexture);
 
                     // TODO: try to find a better way to bind this.
-                    for (int i = 0; i < gbuffer.gbuffer.Length; ++i)
-                        context.cmd.SetGlobalTexture(HDShaderIDs._GBufferTexture[i], context.resources.GetTexture(data.gBuffer[i]));
+                    // Issue is that some GBuffers have several names (for example normal buffer is both NormalBuffer and GBuffer1)
+                    // So it's not possible to use auto binding via dependency to shaderTagID
+                    for (int i = 0; i < data.gbufferCount; ++i)
+                        context.cmd.SetGlobalTexture(HDShaderIDs._GBufferTexture[i], context.resources.GetTexture(data.gbuffer[i]));
 
                     if (data.parameters.enableTile)
                     {

@@ -96,13 +96,13 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
                 BuildGPULightList(m_RenderGraph, hdCamera, GetDepthStencilBuffer(msaa), stencilBufferCopy);
 
-                RenderShadows(m_RenderGraph, hdCamera, cullingResults);
+                var shadowResult = RenderShadows(m_RenderGraph, hdCamera, cullingResults);
 
                 StartLegacyStereo(m_RenderGraph, hdCamera);
 
-                var deferredLightingOutput = RenderDeferredLighting(m_RenderGraph, hdCamera, colorBuffer, diffuseLightingBuffer, prepassOutput.gbuffer);
+                var deferredLightingOutput = RenderDeferredLighting(m_RenderGraph, hdCamera, colorBuffer, diffuseLightingBuffer, prepassOutput.gbuffer, shadowResult);
 
-                RenderForwardOpaque(m_RenderGraph, hdCamera, colorBuffer, diffuseLightingBuffer, sssBuffer, GetDepthStencilBuffer(msaa), cullingResults);
+                RenderForwardOpaque(m_RenderGraph, hdCamera, colorBuffer, diffuseLightingBuffer, sssBuffer, GetDepthStencilBuffer(msaa), shadowResult, cullingResults);
 
                 diffuseLightingBuffer = ResolveMSAAColor(m_RenderGraph, hdCamera, diffuseLightingBuffer, CreateDiffuseLightingBuffer(m_RenderGraph, false));
                 sssBuffer = ResolveMSAAColor(m_RenderGraph, hdCamera, sssBuffer, CreateSSSBuffer(m_RenderGraph, false));
@@ -113,12 +113,12 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                 RenderDecalsForwardEmissive(m_RenderGraph, hdCamera, cullingResults);
 
                 // Render pre-refraction objects
-                RenderForwardTransparent(m_RenderGraph, hdCamera, colorBuffer, GetMotionVectorsBuffer(msaa), GetNormalBuffer(msaa), GetDepthStencilBuffer(msaa), cullingResults, true);
+                RenderForwardTransparent(m_RenderGraph, hdCamera, colorBuffer, GetMotionVectorsBuffer(msaa), GetNormalBuffer(msaa), GetDepthStencilBuffer(msaa), shadowResult, cullingResults, true);
 
                 // Color pyramid
 
                 // Render all type of transparent forward (unlit, lit, complex (hair...)) to keep the sorting between transparent objects.
-                RenderForwardTransparent(m_RenderGraph, hdCamera, colorBuffer, GetMotionVectorsBuffer(msaa), GetNormalBuffer(msaa), GetDepthStencilBuffer(msaa), cullingResults, false);
+                RenderForwardTransparent(m_RenderGraph, hdCamera, colorBuffer, GetMotionVectorsBuffer(msaa), GetNormalBuffer(msaa), GetDepthStencilBuffer(msaa), shadowResult, cullingResults, false);
 
                 colorBuffer = ResolveMSAAColor(m_RenderGraph, hdCamera, colorBuffer, CreateColorBuffer(m_RenderGraph, hdCamera, false));
 
@@ -179,18 +179,20 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             public bool                         renderMotionVecForTransparent;
         }
 
-        void PrepareForwardPassData(RenderGraphBuilder builder, ForwardPassData data, bool opaque, FrameSettings frameSettings, RendererListDesc rendererListDesc, RenderGraphMutableResource depthBuffer)
+        void PrepareForwardPassData(RenderGraphBuilder builder, ForwardPassData data, bool opaque, FrameSettings frameSettings, RendererListDesc rendererListDesc, RenderGraphMutableResource depthBuffer, ShadowResult shadowResult)
         {
             bool useFptl = frameSettings.IsEnabled(FrameSettingsField.FPTLForForwardOpaque) && opaque;
 
             data.frameSettings = frameSettings;
-            data.lightListBuffer = useFptl ? s_LightList : s_PerVoxelLightLists;
+            data.lightListBuffer = useFptl ? m_TileAndClusterData.lightList: m_TileAndClusterData.perVoxelLightLists;
             data.depthBuffer = builder.UseDepthBuffer(depthBuffer, DepthAccess.ReadWrite);
             data.rendererList = builder.UseRendererList(builder.CreateRendererList(rendererListDesc));
             // enable d-buffer flag value is being interpreted more like enable decals in general now that we have clustered
             // decal datas count is 0 if no decals affect transparency
             data.decalsEnabled = (frameSettings.IsEnabled(FrameSettingsField.Decals)) && (DecalSystem.m_DecalDatasCount > 0);
             data.renderMotionVecForTransparent = NeedMotionVectorForTransparent(frameSettings);
+
+            HDShadowManager.ReadShadowResult(builder, shadowResult);
         }
 
         // Guidelines: In deferred by default there is no opaque in forward. However it is possible to force an opaque material to render in forward
@@ -205,13 +207,14 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                                     RenderGraphMutableResource  diffuseLightingBuffer,
                                     RenderGraphMutableResource  sssBuffer,
                                     RenderGraphMutableResource  depthBuffer,
+                                    ShadowResult                shadowResult,
                                     CullingResults              cullResults)
         {
             bool debugDisplay = m_CurrentDebugDisplaySettings.IsDebugDisplayEnabled();
 
             using (var builder = renderGraph.AddRenderPass<ForwardPassData>(debugDisplay ? "Forward Opaque Debug" : "Forward Opaque", out var passData, CustomSamplerId.ForwardPassName.GetSampler()))
             {
-                PrepareForwardPassData(builder, passData, true, hdCamera.frameSettings, PrepareForwardOpaqueRendererList(cullResults, hdCamera), depthBuffer);
+                PrepareForwardPassData(builder, passData, true, hdCamera.frameSettings, PrepareForwardOpaqueRendererList(cullResults, hdCamera), depthBuffer, shadowResult);
 
                 // In case of forward SSS we will bind all the required target. It is up to the shader to write into it or not.
                 if (hdCamera.frameSettings.IsEnabled(FrameSettingsField.SubsurfaceScattering))
@@ -251,6 +254,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                                         RenderGraphMutableResource  motionVectorBuffer,
                                         RenderGraphMutableResource  dummyBuffer,
                                         RenderGraphMutableResource  depthBuffer,
+                                        ShadowResult                shadowResult,
                                         CullingResults              cullResults,
                                         bool                        preRefractionPass)
         {
@@ -267,7 +271,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
             using (var builder = renderGraph.AddRenderPass<ForwardPassData>(passName, out var passData, CustomSamplerId.ForwardPassName.GetSampler()))
             {
-                PrepareForwardPassData(builder, passData, false, hdCamera.frameSettings, PrepareForwardTransparentRendererList(cullResults, hdCamera, preRefractionPass), depthBuffer);
+                PrepareForwardPassData(builder, passData, false, hdCamera.frameSettings, PrepareForwardTransparentRendererList(cullResults, hdCamera, preRefractionPass), depthBuffer, shadowResult);
 
                 bool renderMotionVecForTransparent = NeedMotionVectorForTransparent(hdCamera.frameSettings);
 
