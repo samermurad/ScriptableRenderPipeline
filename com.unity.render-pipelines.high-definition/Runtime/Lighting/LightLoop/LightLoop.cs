@@ -1470,7 +1470,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             }
         }
 
-        public bool GetEnvLightData(CommandBuffer cmd, HDCamera hdCamera, HDProbe probe, DebugDisplaySettings debugDisplaySettings)
+        public bool GetEnvLightData(CommandBuffer cmd, HDCamera hdCamera, HDProbe probe, ref EnvLightData envLightData, DebugDisplaySettings debugDisplaySettings)
         {
             Camera camera = hdCamera.camera;
 
@@ -1543,9 +1543,6 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             if (envIndex == int.MinValue)
                 return false;
 
-            // Build light data
-            var envLightData = new EnvLightData();
-
             InfluenceVolume influence = probe.influenceVolume;
             envLightData.lightLayers = probe.lightLayersAsUInt;
             envLightData.influenceShapeType = influence.envShape;
@@ -1587,7 +1584,6 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             envLightData.proxyForward = proxyToWorld.GetColumn(2).normalized;
             envLightData.proxyPositionRWS = proxyToWorld.GetColumn(3);
 
-            m_lightList.envLights.Add(envLightData);
             return true;
         }
 
@@ -2151,8 +2147,12 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
                         var probeWrapper = SelectProbe(probe, planarProbe);
 
-                        if (GetEnvLightData(cmd, hdCamera, probeWrapper, debugDisplaySettings))
+                        EnvLightData envLightData = new EnvLightData();
+                        if (GetEnvLightData(cmd, hdCamera, probeWrapper, ref envLightData, debugDisplaySettings))
                         {
+                            // it has been filled
+                            m_lightList.envLights.Add(envLightData);
+
                             GetEnvLightVolumeDataAndBound(probeWrapper, lightVolumeType, worldToView);
                             if (hdCamera.xr.instancingEnabled)
                                 GetEnvLightVolumeDataAndBound(probeWrapper, lightVolumeType, rightEyeWorldToView, Camera.StereoscopicEye.Right);
@@ -2162,13 +2162,14 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                             if (ShaderConfig.s_CameraRelativeRendering != 0)
                             {
                                 // Caution: 'EnvLightData.positionRWS' is camera-relative after this point.
-                                int last = m_lightList.envLights.Count - 1;
-                                EnvLightData envLightData = m_lightList.envLights[last];
                                 envLightData.capturePositionRWS -= camPosWS;
                                 envLightData.influencePositionRWS -= camPosWS;
                                 envLightData.proxyPositionRWS -= camPosWS;
-                                m_lightList.envLights[last] = envLightData;
                             }
+                            UpdateEnvLighCameraRelativetData(ref envLightData, camPosWS);
+
+                            int last = m_lightList.envLights.Count - 1;
+                            m_lightList.envLights[last] = envLightData;
                         }
                     }
                 }
@@ -2242,6 +2243,17 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             }
 
             return m_enableBakeShadowMask;
+        }
+
+        public void UpdateEnvLighCameraRelativetData(ref EnvLightData envLightData, Vector3 camPosWS)
+        {
+            if (ShaderConfig.s_CameraRelativeRendering != 0)
+            {
+                // Caution: 'EnvLightData.positionRWS' is camera-relative after this point.
+                envLightData.capturePositionRWS -= camPosWS;
+                envLightData.influencePositionRWS -= camPosWS;
+                envLightData.proxyPositionRWS -= camPosWS;
+            }
         }
 
         static float CalculateProbeLogVolume(Bounds bounds)
