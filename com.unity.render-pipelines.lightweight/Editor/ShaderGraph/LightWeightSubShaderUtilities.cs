@@ -15,6 +15,7 @@ namespace UnityEngine.Rendering.LWRP
         public string TemplatePath;
         public List<int> VertexShaderSlots;
         public List<int> PixelShaderSlots;
+        public ShaderGraphRequirements Requirements;
         public List<string> ExtraDefines;
 
         public void OnGeneratePass(IMasterNode masterNode, ShaderGraphRequirements requirements)
@@ -29,7 +30,7 @@ namespace UnityEngine.Rendering.LWRP
 
     static class LWRPSubShaderUtilities
     {
-        static readonly NeededCoordinateSpace k_PixelCoordinateSpace = NeededCoordinateSpace.World;
+        public static readonly NeededCoordinateSpace k_PixelCoordinateSpace = NeededCoordinateSpace.World;
 
         static string GetTemplatePath(string templateName)
         {
@@ -143,14 +144,7 @@ namespace UnityEngine.Rendering.LWRP
             var pixelRequirements = ShaderGraphRequirements.FromNodes(pixelNodes, ShaderStageCapability.Fragment);
             var graphRequirements = pixelRequirements.Union(vertexRequirements);
             var surfaceRequirements = ShaderGraphRequirements.FromNodes(pixelNodes, ShaderStageCapability.Fragment, false);
-
-            var modelRequiements = ShaderGraphRequirements.none;
-            modelRequiements.requiresNormal |= k_PixelCoordinateSpace;
-            modelRequiements.requiresTangent |= k_PixelCoordinateSpace;
-            modelRequiements.requiresBitangent |= k_PixelCoordinateSpace;
-            modelRequiements.requiresPosition |= k_PixelCoordinateSpace;
-            modelRequiements.requiresViewDir |= k_PixelCoordinateSpace;
-            modelRequiements.requiresMeshUVs.Add(UVChannel.UV1);
+            var modelRequirements = pass.Requirements;
 
             // ----------------------------------------------------- //
             //                START SHADER GENERATION                //
@@ -285,7 +279,7 @@ namespace UnityEngine.Rendering.LWRP
             // -------------------------------------
             // Generate Input structure for Vertex shader
 
-            GraphUtil.GenerateApplicationVertexInputs(vertexRequirements.Union(pixelRequirements.Union(modelRequiements)), vertexInputStruct);
+            GraphUtil.GenerateApplicationVertexInputs(vertexRequirements.Union(pixelRequirements.Union(modelRequirements)), vertexInputStruct);
 
             // -------------------------------------
             // Generate standard transformations
@@ -302,7 +296,7 @@ namespace UnityEngine.Rendering.LWRP
                 pixelShaderSurfaceInputs,
                 pixelRequirements,
                 surfaceRequirements,
-                modelRequiements,
+                modelRequirements,
                 vertexRequirements,
                 CoordinateSpace.World);
 
