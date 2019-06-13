@@ -194,8 +194,6 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         public int m_MaxLightsOnScreen;
         public int m_MaxEnvLightsOnScreen;
 
-        //public ComputeBuffer directionalLightDatas { get { return m_DirectionalLightDatas; } }
-
         Texture2DArray  m_DefaultTexture2DArray;
         Cubemap         m_DefaultTextureCube;
 
@@ -406,14 +404,6 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         LightLoopLightData m_LightLoopLightData = new LightLoopLightData();
         TileAndClusterData m_TileAndClusterData = new TileAndClusterData();
 
-        //public TextureCache2D cookieTexArray { get { return m_TextureCacheData.cookieTexArray; } }
-
-        //public TextureCacheCubemap cubeCookieTexArray { get { return m_CubeCookieTexArray; } }
-
-
-        // Structure for cookies used by area lights
-        //public LTCAreaLightCookieManager areaLightCookieManager { get { return m_AreaLightCookieManager; } }
-
         // For now we don't use shadow cascade borders.
         static public readonly bool s_UseCascadeBorders = true;
 
@@ -486,10 +476,6 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         int m_densityVolumeCount = 0;
         bool m_enableBakeShadowMask = false; // Track if any light require shadow mask. In this case we will need to enable the keyword shadow mask
         bool m_hasRunLightListPrevFrame = false;
-
-        // This value is used to compute the area shadow when using raytracing by the HDRaytracingShadowManager
-        //public int areaLightCount { get { return m_areaLightCount; } }
-        //public ComputeBuffer lightDatas { get { return m_LightDatas; } }
 
         ComputeShader buildScreenAABBShader { get { return asset.renderPipelineResources.shaders.buildScreenAABBCS; } }
         ComputeShader buildPerTileLightListShader { get { return asset.renderPipelineResources.shaders.buildPerTileLightListCS; } }
@@ -754,24 +740,24 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
             for (int outputSplitLighting = 0; outputSplitLighting < 2; ++outputSplitLighting)
             {
-                    for (int shadowMask = 0; shadowMask < 2; ++shadowMask)
+                for (int shadowMask = 0; shadowMask < 2; ++shadowMask)
+                {
+                    for (int debugDisplay = 0; debugDisplay < 2; ++debugDisplay)
                     {
-                        for (int debugDisplay = 0; debugDisplay < 2; ++debugDisplay)
-                        {
                         int index = GetDeferredLightingMaterialIndex(outputSplitLighting, shadowMask, debugDisplay);
 
-                            m_deferredLightingMaterial[index] = CoreUtils.CreateEngineMaterial(asset.renderPipelineResources.shaders.deferredPS);
-                            m_deferredLightingMaterial[index].name = string.Format("{0}_{1}", asset.renderPipelineResources.shaders.deferredPS.name, index);
-                            CoreUtils.SetKeyword(m_deferredLightingMaterial[index], "OUTPUT_SPLIT_LIGHTING", outputSplitLighting == 1);
-                            CoreUtils.SetKeyword(m_deferredLightingMaterial[index], "SHADOWS_SHADOWMASK", shadowMask == 1);
-                            CoreUtils.SetKeyword(m_deferredLightingMaterial[index], "DEBUG_DISPLAY", debugDisplay == 1);
+                        m_deferredLightingMaterial[index] = CoreUtils.CreateEngineMaterial(asset.renderPipelineResources.shaders.deferredPS);
+                        m_deferredLightingMaterial[index].name = string.Format("{0}_{1}", asset.renderPipelineResources.shaders.deferredPS.name, index);
+                        CoreUtils.SetKeyword(m_deferredLightingMaterial[index], "OUTPUT_SPLIT_LIGHTING", outputSplitLighting == 1);
+                        CoreUtils.SetKeyword(m_deferredLightingMaterial[index], "SHADOWS_SHADOWMASK", shadowMask == 1);
+                        CoreUtils.SetKeyword(m_deferredLightingMaterial[index], "DEBUG_DISPLAY", debugDisplay == 1);
 
-                            m_deferredLightingMaterial[index].SetInt(HDShaderIDs._StencilMask, (int)HDRenderPipeline.StencilBitMask.LightingMask);
-                            m_deferredLightingMaterial[index].SetInt(HDShaderIDs._StencilRef, outputSplitLighting == 1 ? (int)StencilLightingUsage.SplitLighting : (int)StencilLightingUsage.RegularLighting);
-                            m_deferredLightingMaterial[index].SetInt(HDShaderIDs._StencilCmp, (int)CompareFunction.Equal);
-                        }
+                        m_deferredLightingMaterial[index].SetInt(HDShaderIDs._StencilMask, (int)HDRenderPipeline.StencilBitMask.LightingMask);
+                        m_deferredLightingMaterial[index].SetInt(HDShaderIDs._StencilRef, outputSplitLighting == 1 ? (int)StencilLightingUsage.SplitLighting : (int)StencilLightingUsage.RegularLighting);
+                        m_deferredLightingMaterial[index].SetInt(HDShaderIDs._StencilCmp, (int)CompareFunction.Equal);
                     }
                 }
+            }
 
             // Stencil set to only touch "regular lighting" pixels.
             s_DeferredTileRegularLightingMat = CoreUtils.CreateEngineMaterial(deferredTilePixelShader);
@@ -838,15 +824,15 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
             for (int outputSplitLighting = 0; outputSplitLighting < 2; ++outputSplitLighting)
             {
-                    for (int shadowMask = 0; shadowMask < 2; ++shadowMask)
+                for (int shadowMask = 0; shadowMask < 2; ++shadowMask)
+                {
+                    for (int debugDisplay = 0; debugDisplay < 2; ++debugDisplay)
                     {
-                        for (int debugDisplay = 0; debugDisplay < 2; ++debugDisplay)
-                        {
                         int index = GetDeferredLightingMaterialIndex(outputSplitLighting, shadowMask, debugDisplay);
-                            CoreUtils.Destroy(m_deferredLightingMaterial[index]);
-                        }
+                        CoreUtils.Destroy(m_deferredLightingMaterial[index]);
                     }
                 }
+            }
 
             CoreUtils.Destroy(s_DeferredTileRegularLightingMat);
             CoreUtils.Destroy(s_DeferredTileSplitLightingMat);
