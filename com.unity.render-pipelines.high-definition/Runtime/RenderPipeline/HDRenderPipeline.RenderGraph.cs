@@ -314,7 +314,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
             using (var builder = renderGraph.AddRenderPass<RenderDecalsForwardEmissivePassData>("DecalsForwardEmissive", out var passData, CustomSamplerId.DecalsForwardEmissive.GetSampler()))
             {
-                passData.rendererList = builder.UseRendererList(builder.CreateRendererList(PrepareDecalsEmissiveRendererList(cullingResults, hdCamera)));
+                passData.rendererList = builder.UseRendererList(builder.CreateRendererList(PrepareForwardEmissiveRendererList(cullingResults, hdCamera)));
 
                 builder.SetRenderFunc(
                     (RenderDecalsForwardEmissivePassData data, RenderGraphContext context) =>

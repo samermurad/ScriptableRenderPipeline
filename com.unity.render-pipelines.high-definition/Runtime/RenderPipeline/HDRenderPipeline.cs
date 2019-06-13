@@ -374,7 +374,6 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             // Render Graph
             m_RenderGraph = new RenderGraph(m_Asset.currentPlatformRenderPipelineSettings.supportMSAA, m_MSAASamples);
             InitializeSharedResources(m_Asset);
-            InitializeAmbientOcclusion(m_Asset);
             InitializePrepass(m_Asset);
             m_ColorResolveMaterial = CoreUtils.CreateEngineMaterial(asset.renderPipelineResources.shaders.colorResolvePS);
         }
@@ -724,7 +723,6 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             // RenderGraph
             m_RenderGraph.Cleanup();
             CleanupSharedResources();
-            CleanupAmbientOcclusion();
             CleanupPrepass();
             CoreUtils.Destroy(m_ColorResolveMaterial);
 

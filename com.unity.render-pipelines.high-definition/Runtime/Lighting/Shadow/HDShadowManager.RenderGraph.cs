@@ -54,7 +54,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             if (m_ShadowRequests.Count == 0)
                 return result;
 
-            using (var builder = renderGraph.AddRenderPass<RenderShadowsPassData>(shadowPassName, out var passData, CustomSamplerId.RenderShadows.GetSampler()))
+            using (var builder = renderGraph.AddRenderPass<RenderShadowsPassData>(shadowPassName, out var passData, CustomSamplerId.RenderShadowMaps.GetSampler()))
             {
                 passData.parameters = PrepareRenderShadowsParameters();
                 // TODO: Get rid of this and refactor to use the same kind of API than RendererList
