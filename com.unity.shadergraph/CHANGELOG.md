@@ -9,9 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - You can now use the `SHADERGRAPH_PREVIEW` keyword in `Custom Function Node` to generate different code for preview Shaders.
 - Color Mode improves node visibility by coloring the title bar by Category, Precision, or custom colors.
 - You can now set the precision of a Shader Graph and individual nodes.
+- **Asbolute World** space on `Position Node` now provides absolute world space coordinates regardless of the active render pipeline.
 
 ### Changed
 - The `Custom Function Node` now uses an object field to reference its source when using `File` mode.
+- **World** space on `Position Node` now uses the default world space coordinates of the active render pipeline. 
 
 ### Fixed
 - Fixed an error in `Custom Function Node` port naming.
