@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed an error that occured when creating a Sub Graph from a selection containing a Group Node.
 - When you change a Sub Graph, Shader Graph windows now correctly reload.
 - When you save a Shader Graph, all other Shader Graph windows no longer re-compile their preview Shaders.
+- The `Bitangent Vector Node` now generates all necessary shader requirements.
 
 ## [6.7.0-preview] - 2019-05-16
 ### Added
