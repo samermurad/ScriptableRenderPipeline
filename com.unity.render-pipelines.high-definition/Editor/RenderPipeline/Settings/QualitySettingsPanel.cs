@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Experimental.Rendering.HDPipeline;
 using UnityEngine.Rendering;
 using UnityEngine.UIElements;
@@ -14,7 +15,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
         [SettingsProvider]
         public static SettingsProvider CreateSettingsProvider()
         {
-            return new SettingsProvider("HDRP/Quality", SettingsScope.Project)
+            return new SettingsProvider("Project/Quality/HDRP", SettingsScope.Project)
             {
                 activateHandler = (searchContext, rootElement) =>
                 {
@@ -32,10 +33,12 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
         class HDRPAssetHeaderEntry : VisualElement
         {
             TextElement m_Element;
+            List<Label> m_ConfigNames;
 
             public HDRPAssetHeaderEntry()
             {
                 m_Element = new Label();
+                m_ConfigNames = new List<Label>();
 
                 m_Element.style.paddingLeft = 5;
                 m_Element.style.flexGrow = 1;
@@ -47,11 +50,28 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
 
             public void Bind(int index, HDRPAssetLocations asset)
             {
-                var names = asset.indices.Select(i => QualitySettings.names[i]);
-                if (asset.isDefault)
-                    names = Enumerable.Repeat("default", 1).Union(names);
+                // Update number of label in cache for this row
+                var desiredNumberOfConfig = asset.indices.Count + (asset.isDefault ? 1 : 0);
+                var configNameCountDiff = desiredNumberOfConfig - m_ConfigNames.Count;
+                for (var i = 0; i < -configNameCountDiff; ++i)
+                {
+                    Remove(m_ConfigNames[0]);
+                    m_ConfigNames.RemoveAt(0);
+                }
+                for (var i = 0; i < configNameCountDiff; ++i)
+                {
+                    var newText = new Label();
+                    newText.AddToClassList("unity-quality-entry-tag");
+                    Add(newText);
+                    m_ConfigNames.Add(newText);
+                }
+                Assert.AreEqual(desiredNumberOfConfig, m_ConfigNames.Count);
 
-                m_Element.text = $"{asset.asset.name} in {string.Join(", ", names.ToArray())}";
+                m_Element.text = asset.asset.name;
+                for (var i = 0; i < asset.indices.Count; ++i)
+                    m_ConfigNames[i].text = QualitySettings.names[asset.indices[i]];
+                if (asset.isDefault)
+                    m_ConfigNames[m_ConfigNames.Count - 1].text = "default";
 
                 RemoveFromClassList("even");
                 RemoveFromClassList("odd");
@@ -82,6 +102,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
 
             public QualitySettingsPanelVisualElement(string searchContext)
             {
+                // Get the assigned HDRP assets
                 m_HDRPAssets = new List<HDRPAssetLocations>();
                 if (GraphicsSettings.renderPipelineAsset is HDRenderPipelineAsset hdrp)
                     m_HDRPAssets.Add(new HDRPAssetLocations(true, hdrp));
@@ -101,8 +122,9 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                         loc.indices.Add(i);
                         m_HDRPAssets.Add(loc);
                     }
-
                 }
+
+                m_HDRPAssets.Sort((l, r) => string.CompareOrdinal(l.asset.name, r.asset.name));
 
                 // title
                 var title = new Label()
@@ -118,7 +140,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 m_HDRPAssetList = new ListView()
                 {
                     bindItem = (el, i) => ((HDRPAssetHeaderEntry)el).Bind(i, m_HDRPAssets[i]),
-                    itemHeight = (int)EditorGUIUtility.singleLineHeight,
+                    itemHeight = (int)EditorGUIUtility.singleLineHeight + 3,
                     selectionType = SelectionType.Single,
                     itemsSource = m_HDRPAssets,
                     makeItem = () => new HDRPAssetHeaderEntry(),

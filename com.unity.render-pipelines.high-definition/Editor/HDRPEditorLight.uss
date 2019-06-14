@@ -12,3 +12,7 @@
 .unity-quality-header-list {
     border-color: #999999;
 }
+
+.unity-quality-entry-tag {
+    border-color: #999999;
+}
