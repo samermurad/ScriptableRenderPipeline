@@ -11,7 +11,7 @@ namespace UnityEditor.ShaderGraph.UnitTests
     [TestFixture]
     internal class EdgeTypeConversionTests
     {
-        static string kGraphName = "Assets/TestbedAssets/SlotConv.shadergraph";
+        static string kGraphName = "Assets/CommonAssets/Graphs/SlotConv.shadergraph";
         GraphData m_Graph;
         CustomFunctionNode m_CFNode;
         
