@@ -96,7 +96,8 @@ void InitializeInputData(Varyings IN, half3 normalTS, out InputData input)
 
 void SplatmapMix(Varyings IN, half4 defaultAlpha, out half4 splatControl, out half weight, out half4 mixedDiffuse, inout half3 mixedNormal)
 {
-    splatControl = SAMPLE_TEXTURE2D(_Control, sampler_Control, IN.uvMainAndLM.xy);
+    float2 splatUV = (IN.uvMainAndLM.xy * (_Control_TexelSize.zw - 1.0f) + 0.5f) * _Control_TexelSize.xy;
+    splatControl = SAMPLE_TEXTURE2D(_Control, sampler_Control, splatUV);
     weight = dot(splatControl, 1.0h);
 
 #if !defined(SHADER_API_MOBILE) && defined(TERRAIN_SPLAT_ADDPASS)
