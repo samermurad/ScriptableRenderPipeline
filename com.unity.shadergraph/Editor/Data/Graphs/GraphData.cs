@@ -180,6 +180,11 @@ namespace UnityEditor.ShaderGraph
 
         public IEnumerable<StickyNoteData> removedNotes => m_RemovedNotes;
 
+        [NonSerialized]
+        List<StickyNoteData> m_PastedStickyNotes = new List<StickyNoteData>();
+
+        public IEnumerable<StickyNoteData> pastedStickyNotes => m_PastedStickyNotes;
+
         #endregion
 
         #region Edge data
@@ -320,6 +325,7 @@ namespace UnityEditor.ShaderGraph
             m_MovedProperties.Clear();
             m_AddedStickyNotes.Clear();
             m_RemovedNotes.Clear();
+            m_PastedStickyNotes.Clear();
             m_MostRecentlyCreatedGroup = null;
             didActiveOutputNodeChange = false;
         }
@@ -563,10 +569,9 @@ namespace UnityEditor.ShaderGraph
             ValidateGraph();
         }
 
-        public void RemoveElements(IEnumerable<AbstractMaterialNode> nodes, IEnumerable<IEdge> edges, IEnumerable<GroupData> groups, IEnumerable<StickyNoteData> notes)
+        public void RemoveElements(AbstractMaterialNode[] nodes, IEdge[] edges, GroupData[] groups, StickyNoteData[] notes)
         {
-            var nodesCopy = nodes.ToArray();
-            foreach (var node in nodesCopy)
+            foreach (var node in nodes)
             {
                 if (!node.canDeleteNode)
                 {
@@ -579,14 +584,14 @@ namespace UnityEditor.ShaderGraph
                 RemoveEdgeNoValidate(edge);
             }
 
-            foreach (var serializableNode in nodesCopy)
-            {
-                RemoveNodeNoValidate(serializableNode);
-            }
-
             foreach (var groupData in groups)
             {
                 RemoveGroupNoValidate(groupData);
+            }
+
+            foreach (var serializableNode in nodes)
+            {
+                RemoveNodeNoValidate(serializableNode);
             }
 
             foreach (var noteData in notes)
@@ -1024,7 +1029,18 @@ namespace UnityEditor.ShaderGraph
 
             foreach (var stickyNote in graphToPaste.stickyNotes)
             {
-                Debug.Log($"PASTING! {stickyNote.guid} : {stickyNote.position}");
+                var position = stickyNote.position;
+                position.x += 30;
+                position.y += 30;
+
+                StickyNoteData pastedStickyNote = new StickyNoteData(stickyNote.title, stickyNote.content, position);
+                if (groupGuidMap.ContainsKey(stickyNote.groupGuid))
+                {
+                    pastedStickyNote.groupGuid = groupGuidMap[stickyNote.groupGuid];
+                }
+
+                AddStickyNote(pastedStickyNote);
+                m_PastedStickyNotes.Add(pastedStickyNote);
             }
 
             var nodeGuidMap = new Dictionary<Guid, Guid>();
@@ -1145,7 +1161,7 @@ namespace UnityEditor.ShaderGraph
                 AddEdgeToNodeEdges(edge);
 
             m_OutputNode = null;
-            
+
             if (!isSubGraph)
             {
                 if (string.IsNullOrEmpty(m_ActiveOutputNodeGuidSerialized))

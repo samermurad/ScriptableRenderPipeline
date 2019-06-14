@@ -84,7 +84,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                 m_BlackboardProvider.assetName = value;
             }
         }
-        
+
         public ColorManager colorManager
         {
             get => m_ColorManager;
@@ -178,7 +178,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                             m_ColorManager.SetActiveProvider(newColorIdx, m_GraphView.Query<MaterialNodeView>().ToList());
                             m_UserViewSettings.colorProvider = m_ColorManager.activeProviderName;
                         }
-                    
+
                         m_MasterPreviewView.visible = m_UserViewSettings.isPreviewVisible;
                         m_BlackboardProvider.blackboard.visible = m_UserViewSettings.isBlackboardVisible;
                         var serializedViewSettings = JsonUtility.ToJson(m_UserViewSettings);
@@ -316,26 +316,22 @@ namespace UnityEditor.ShaderGraph.Drawing
                     SetGroupPosition(groupNode);
                 }
 
-                foreach (var element in graphViewChange.movedElements)
-                {
-                    var stickyNote = element as StickyNote;
-                    if (stickyNote == null)
-                        continue;
-                    SetStickyNotePosition(stickyNote);
-                }
-
                 if(nodesInsideGroup.Any())
                     graphViewChange.movedElements.AddRange(nodesInsideGroup);
 
                 foreach (var element in graphViewChange.movedElements)
                 {
-                    var node = element.userData as AbstractMaterialNode;
-                    if (node == null)
-                        continue;
+                    if (element.userData is AbstractMaterialNode node)
+                    {
+                        var drawState = node.drawState;
+                        drawState.position = element.parent.ChangeCoordinatesTo(m_GraphView.contentViewContainer, element.GetPosition());
+                        node.drawState = drawState;
+                    }
 
-                    var drawState = node.drawState;
-                    drawState.position = element.parent.ChangeCoordinatesTo(m_GraphView.contentViewContainer, element.GetPosition());
-                    node.drawState = drawState;
+                    if (element is StickyNote stickyNote)
+                    {
+                        SetStickyNotePosition(stickyNote);
+                    }
                 }
             }
 
@@ -345,10 +341,10 @@ namespace UnityEditor.ShaderGraph.Drawing
             if (graphViewChange.elementsToRemove != null)
             {
                 m_Graph.owner.RegisterCompleteObjectUndo("Remove Elements");
-                m_Graph.RemoveElements(graphViewChange.elementsToRemove.OfType<IShaderNodeView>().Select(v => v.node),
-                    graphViewChange.elementsToRemove.OfType<Edge>().Select(e => (IEdge)e.userData),
-                    graphViewChange.elementsToRemove.OfType<ShaderGroup>().Select(g => g.userData),
-                    graphViewChange.elementsToRemove.OfType<StickyNote>().Select(n => n.userData));
+                m_Graph.RemoveElements(graphViewChange.elementsToRemove.OfType<IShaderNodeView>().Select(v => v.node).ToArray(),
+                    graphViewChange.elementsToRemove.OfType<Edge>().Select(e => (IEdge)e.userData).ToArray(),
+                    graphViewChange.elementsToRemove.OfType<ShaderGroup>().Select(g => g.userData).ToArray(),
+                    graphViewChange.elementsToRemove.OfType<StickyNote>().Select(n => n.userData).ToArray());
                 foreach (var edge in graphViewChange.elementsToRemove.OfType<Edge>())
                 {
                     if (edge.input != null)
@@ -562,6 +558,12 @@ namespace UnityEditor.ShaderGraph.Drawing
             {
                 var group = m_GraphView.graphElements.ToList().OfType<ShaderGroup>().ToList().First(g => g.userData == groupData);
                 m_GraphView.AddToSelection(group);
+            }
+
+            foreach (var stickyNoteData in m_Graph.pastedStickyNotes)
+            {
+                var stickyNote = m_GraphView.graphElements.ToList().OfType<StickyNote>().First(s => s.userData == stickyNoteData);
+                m_GraphView.AddToSelection(stickyNote);
             }
 
             foreach (var node in m_Graph.pastedNodes)
