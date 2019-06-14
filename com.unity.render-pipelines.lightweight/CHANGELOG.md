@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added missing page for 2D Lights in LWRP.
 - Fixed warnings for unsupported shadow map formats for GLES2 API.
 - Disabled shadows for devices that do not support shadow maps or depth textures.
+- TEST ITEM PLEASE IGNORE
 
 ## [6.7.0] - 2019-05-16
 ### Added
