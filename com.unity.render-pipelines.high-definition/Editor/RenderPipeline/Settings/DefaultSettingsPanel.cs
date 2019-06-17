@@ -64,6 +64,9 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
 
             void Draw_VolumeInspector()
             {
+                if (m_DefaultVolumeProfile == null || m_DefaultVolumeProfile.Equals(null))
+                    m_DefaultVolumeProfile = GetOrCreateDefaultVolumeProfile();
+                
                 Editor.CreateCachedEditor(m_DefaultVolumeProfile, Type.GetType("UnityEditor.Rendering.VolumeProfileEditor"), ref m_Cached);
                 m_Cached.OnInspectorGUI();
             }
