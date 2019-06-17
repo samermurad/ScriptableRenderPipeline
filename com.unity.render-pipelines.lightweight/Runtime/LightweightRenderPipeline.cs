@@ -322,7 +322,7 @@ namespace UnityEngine.Rendering.LWRP
             bool platformNeedsToKillAlpha = Application.platform == RuntimePlatform.IPhonePlayer ||
                 Application.platform == RuntimePlatform.Android ||
                 Application.platform == RuntimePlatform.tvOS;
-            renderingData.killAlphaInFinalBlit = !Graphics.preserveFramebufferAlpha && platformNeedsToKillAlpha;
+            renderingData.killAlphaInFinalBlit = cameraData.camera.targetTexture == null && !Graphics.preserveFramebufferAlpha && platformNeedsToKillAlpha;
         }
 
         static void InitializeShadowData(LightweightRenderPipelineAsset settings, NativeArray<VisibleLight> visibleLights, bool mainLightCastShadows, bool additionalLightsCastShadows, out ShadowData shadowData)
