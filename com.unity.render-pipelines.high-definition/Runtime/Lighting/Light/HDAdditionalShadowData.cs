@@ -13,7 +13,6 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             shadowData.normalBiasMin        = 0.5f;
             shadowData.normalBiasMax        = 0.5f;
             shadowData.normalBiasScale      = 1.0f;
-            shadowData.sampleBiasScale      = false;
         }
     }
 }

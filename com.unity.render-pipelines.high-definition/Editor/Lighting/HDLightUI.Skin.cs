@@ -89,7 +89,6 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             public readonly GUIContent normalBiasMin = new GUIContent("Normal Bias");
             public readonly GUIContent normalBiasMax = new GUIContent("Normal Bias Max");
             public readonly GUIContent normalBiasScale = new GUIContent("Normal Bias Scale");
-            public readonly GUIContent sampleBiasScale = new GUIContent("Sample Bias Scale");
 
             // Shadow filter settings
             public readonly GUIContent shadowSoftness = new GUIContent("Shadow Softness", "Size of the penumbra.");

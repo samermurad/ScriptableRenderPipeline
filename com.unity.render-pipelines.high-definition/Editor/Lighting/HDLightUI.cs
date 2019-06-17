@@ -682,7 +682,6 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                     }
                     //EditorGUILayout.PropertyField(serialized.serializedShadowData.normalBiasMax, s_Styles.normalBiasMax);
                     //EditorGUILayout.PropertyField(serialized.serializedShadowData.normalBiasScale, s_Styles.normalBiasScale);
-                    //EditorGUILayout.PropertyField(serialized.serializedShadowData.sampleBiasScale, s_Styles.sampleBiasScale);
                 }
 
                 // Dimmer and Tint don't have effect on baked shadow
