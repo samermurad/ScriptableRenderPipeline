@@ -27,7 +27,7 @@ struct HDShadowData
     float4 shadowMapSize;
     float4 viewBias;
     float3 normalBias;
-    float _padding;
+    float constantBias;
     float4 shadowFilterParams0;
     float4x4 shadowToWorld;
 };
@@ -92,9 +92,9 @@ float3 GetNormalBias(HDShadowData value)
 {
     return value.normalBias;
 }
-float Get_padding(HDShadowData value)
+float GetConstantBias(HDShadowData value)
 {
-    return value._padding;
+    return value.constantBias;
 }
 float4 GetShadowFilterParams0(HDShadowData value)
 {

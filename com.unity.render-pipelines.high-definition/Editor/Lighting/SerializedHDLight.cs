@@ -80,6 +80,8 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             public SerializedProperty viewBiasMin;
             public SerializedProperty viewBiasMax;
             public SerializedProperty viewBiasScale;
+            public SerializedProperty constantBias;
+
             public SerializedProperty normalBiasMin;
             public SerializedProperty normalBiasMax;
             public SerializedProperty normalBiasScale;
@@ -183,6 +185,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                     viewBiasMin = o.Find(x => x.viewBiasMin),
                     viewBiasMax = o.Find(x => x.viewBiasMax),
                     viewBiasScale = o.Find(x => x.viewBiasScale),
+                    constantBias = o.Find(x => x.constantBias),
                     normalBiasMin = o.Find(x => x.normalBiasMin),
                     normalBiasMax = o.Find(x => x.normalBiasMax),
                     normalBiasScale = o.Find(x => x.normalBiasScale),

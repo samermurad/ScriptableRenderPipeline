@@ -9,7 +9,7 @@
 //  PCF Filtering methods
 // ------------------------------------------------------------------
 
-float SampleShadow_PCF_Tent_3x3(float4 shadowAtlasSize, float3 coord, float2 sampleBias, Texture2D tex, SamplerComparisonState compSamp)
+float SampleShadow_PCF_Tent_3x3(float4 shadowAtlasSize, float3 coord, float2 sampleBias, Texture2D tex, SamplerComparisonState compSamp, float depthBias)
 {
 #if SHADOW_USE_DEPTH_BIAS == 1
     // add the depth bias
@@ -33,7 +33,7 @@ float SampleShadow_PCF_Tent_3x3(float4 shadowAtlasSize, float3 coord, float2 sam
 //
 
 // shadowAtlasSize.xy is the shadow atlas size in pixel and shadowAtlasSize.zw is rcp(shadow atlas size)
-float SampleShadow_PCF_Tent_5x5(float4 shadowAtlasSize, float3 coord, float2 sampleBias, Texture2D tex, SamplerComparisonState compSamp)
+float SampleShadow_PCF_Tent_5x5(float4 shadowAtlasSize, float3 coord, float2 sampleBias, Texture2D tex, SamplerComparisonState compSamp, float depthBias)
 {
 #if SHADOW_USE_DEPTH_BIAS == 1
     // add the depth bias
@@ -81,7 +81,7 @@ float SampleShadow_PCF_Tent_5x5(float4 shadowAtlasSize, float3 coord, float2 sam
 //
 //                  7x7 tent PCF sampling (16 taps)
 //
-float SampleShadow_PCF_Tent_7x7(float4 shadowAtlasSize, float3 coord, float2 sampleBias, Texture2D tex, SamplerComparisonState compSamp)
+float SampleShadow_PCF_Tent_7x7(float4 shadowAtlasSize, float3 coord, float2 sampleBias, Texture2D tex, SamplerComparisonState compSamp, float depthBias)
 {
 #if SHADOW_USE_DEPTH_BIAS == 1
     // add the depth bias
@@ -142,7 +142,7 @@ float SampleShadow_PCF_Tent_7x7(float4 shadowAtlasSize, float3 coord, float2 sam
 //
 //                  9 tap adaptive PCF sampling
 //
-float SampleShadow_PCF_9tap_Adaptive(float4 texelSizeRcp, float3 tcs, float2 sampleBias, float filterSize, Texture2D tex, SamplerComparisonState compSamp)
+float SampleShadow_PCF_9tap_Adaptive(float4 texelSizeRcp, float3 tcs, float2 sampleBias, float filterSize, Texture2D tex, SamplerComparisonState compSamp, float depthBias)
 {
     texelSizeRcp *= filterSize;
 

@@ -35,6 +35,8 @@ namespace UnityEngine.Experimental.Rendering
         [Range(0.0F, 1.0F)]
         public float edgeTolerance = 1.0f;
 
+        public float constantBias = 0.33f;
+
         [HideInInspector, SerializeField]
         private int shadowCascadeCount = 4;
         [HideInInspector, SerializeField]
@@ -62,6 +64,7 @@ namespace UnityEngine.Experimental.Rendering
             data.viewBiasMin = viewBiasMin;
             data.viewBiasMax = viewBiasMax;
             data.viewBiasScale = viewBiasScale;
+            data.constantBias = constantBias;
             data.normalBiasMin = normalBiasMin;
             data.normalBiasMax = normalBiasMax;
             data.normalBiasScale = normalBiasScale;

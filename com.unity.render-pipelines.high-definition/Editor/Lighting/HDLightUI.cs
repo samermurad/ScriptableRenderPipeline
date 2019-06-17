@@ -627,6 +627,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                     else
                     {
                         EditorGUILayout.Slider(serialized.serializedShadowData.viewBiasScale, 0.0f, 15.0f, s_Styles.viewBiasScale);
+
                     }
                 }
 #if ENABLE_RAYTRACING
@@ -675,6 +676,8 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 }
                 else
                 {
+                    EditorGUILayout.Slider(serialized.serializedShadowData.constantBias, 0.0f, 1.0f, s_Styles.constantScale);
+
                     EditorGUILayout.Slider(serialized.serializedShadowData.viewBiasMin, 0.0f, 5.0f, s_Styles.viewBiasMin);
                     //EditorGUILayout.PropertyField(serialized.serializedShadowData.viewBiasMax, s_Styles.viewBiasMax);
                     EditorGUI.BeginChangeCheck();

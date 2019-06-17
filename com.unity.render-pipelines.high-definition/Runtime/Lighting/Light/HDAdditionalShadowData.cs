@@ -12,6 +12,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             shadowData.viewBiasMin          = 0.2f;
             shadowData.viewBiasMax          = 100.0f; // Not used, high value to have no effect
             shadowData.viewBiasScale        = 1.0f;
+            shadowData.constantBias         = 0.33f;
             shadowData.normalBiasMin        = 0.5f;
             shadowData.normalBiasMax        = 0.5f;
             shadowData.normalBiasScale      = 1.0f;

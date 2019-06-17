@@ -30,7 +30,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
         public Vector4      viewBias;
         public Vector3      normalBias;
-        public float        _padding;
+        public float        constantBias;
 
         public Vector4      shadowFilterParams0;
 
@@ -92,6 +92,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         public Vector3              normalBias;
         public float                edgeTolerance;
         public int                  flags;
+
+        public Vector4              TMP_otherBiases;
 
         // PCSS parameters
         public float                shadowSoftness;
@@ -372,6 +374,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             data.shadowMapSize = new Vector4(shadowRequest.atlasViewport.width, shadowRequest.atlasViewport.height, 1.0f / shadowRequest.atlasViewport.width, 1.0f / shadowRequest.atlasViewport.height);
 
             data.viewBias = shadowRequest.viewBias;
+            data.constantBias = shadowRequest.TMP_otherBiases.x;
             data.normalBias = shadowRequest.normalBias;
             data.flags = shadowRequest.flags;
             data.edgeTolerance = shadowRequest.edgeTolerance;

@@ -87,6 +87,8 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             public readonly GUIContent viewBiasMin = new GUIContent("View Bias");
             public readonly GUIContent viewBiasMax = new GUIContent("View Bias Max");
             public readonly GUIContent viewBiasScale = new GUIContent("View Bias Scale");
+            public readonly GUIContent constantScale = new GUIContent("Constant Depth Bias");
+
             public readonly GUIContent normalBiasMin = new GUIContent("Normal Bias");
             public readonly GUIContent normalBiasMax = new GUIContent("Normal Bias Max");
             public readonly GUIContent normalBiasScale = new GUIContent("Normal Bias Scale");
