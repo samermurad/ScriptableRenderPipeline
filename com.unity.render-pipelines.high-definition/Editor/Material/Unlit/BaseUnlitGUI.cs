@@ -67,6 +67,9 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 material.SetOverrideTag("RenderType", alphaTestEnable ? "TransparentCutout" : "");
                 material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
                 material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                // We also setup the alpha blend mode in case we used after postprocess
+                material.SetInt("_AlphaSrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                material.SetInt("_AlphaDstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
                 material.SetInt(kZWrite, 1);
             }
             else
