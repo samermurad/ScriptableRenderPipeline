@@ -114,6 +114,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         // Uber feature map to workaround the lack of multi_compile in compute shaders
         readonly Dictionary<int, string> m_UberPostFeatureMap = new Dictionary<int, string>();
 
+        readonly System.Random m_Random;
+
         public PostProcessSystem(HDRenderPipelineAsset hdAsset)
         {
             m_Resources = hdAsset.renderPipelineResources;
@@ -182,6 +184,10 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
             // Initialize our target pool to ease RT management
             m_Pool = new TargetPool();
+
+            // Use a custom RNG, we don't want to mess with the Unity one that the users might be
+            // relying on (breaks determinism in their code)
+            m_Random = new System.Random();
 
             // Misc targets
             m_TempTexture1024 = RTHandles.Alloc(
@@ -2219,8 +2225,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                         int offsetX = 0;
                         int offsetY = 0;
                         #else
-                        int offsetX = (int)(Random.value * texture.width);
-                        int offsetY = (int)(Random.value * texture.height);
+                        int offsetX = (int)(m_Random.NextDouble() * texture.width);
+                        int offsetY = (int)(m_Random.NextDouble() * texture.height);
                         #endif
 
                         m_FinalPassMaterial.EnableKeyword("GRAIN");
