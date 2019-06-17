@@ -1,7 +1,6 @@
-using System;
+#if QUALITY_SETTINGS_GET_RENDER_PIPELINE_AT_AVAILABLE
+
 using System.Collections.Generic;
-using System.Linq;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Experimental.Rendering.HDPipeline;
@@ -187,3 +186,4 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
         }
     }
 }
+#endif
