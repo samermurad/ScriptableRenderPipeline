@@ -68,8 +68,11 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
                 material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
                 // We also setup the alpha blend mode in case we used after postprocess
-                material.SetInt("_AlphaSrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-                material.SetInt("_AlphaDstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                if (HDRenderQueue.k_RenderQueue_AfterPostProcessOpaque.Contains(material.renderQueue))
+                {
+                    material.SetInt("_AlphaSrcBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                    material.SetInt("_AlphaDstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                }
                 material.SetInt(kZWrite, 1);
             }
             else
