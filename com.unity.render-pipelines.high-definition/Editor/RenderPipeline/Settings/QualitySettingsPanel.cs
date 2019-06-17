@@ -177,11 +177,12 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             void DrawInspector()
             {
                 var selected = m_HDRPAssetList.selectedIndex;
-                if (selected >= 0)
-                {
-                    Editor.CreateCachedEditor(m_HDRPAssets[selected].asset, typeof(HDRenderPipelineEditor), ref m_Cached);
-                    m_Cached.OnInspectorGUI();
-                }
+                if (selected < 0)
+                    return;
+
+                Editor.CreateCachedEditor(m_HDRPAssets[selected].asset, typeof(HDRenderPipelineEditor), ref m_Cached);
+                ((HDRenderPipelineEditor) m_Cached).showInspector = true;
+                m_Cached.OnInspectorGUI();
             }
         }
     }
