@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added an option to enable the ztest on **After Post Process** materials when TAA is disabled.
 - Added a new SSAO (based on Ground Truth Ambient Occlusion algorithm) to replace the previous one. 
 - Added support for shadow tint on light
+- Added frame settings for individual post-processing effects
 
 ### Fixed
 - Fixed an issue with history buffers causing effects like TAA or auto exposure to flicker when more than one camera was visible in the editor
@@ -37,6 +38,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Removed unnecessary GC allocation in motion blur code
 - Fixed locked UI with advanded influence volume inspector for probes
 - Fixed invalid capture direction when rendering planar reflection probes
+- Fixed the Bloom prefiltering pass
+- Fixed post-processing effect relying on Unity's random number generator
 
 ### Changed
 - Optimization: Reduce the group size of the deferred lighting pass from 16x16 to 8x8
@@ -50,6 +53,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Replace ComputeMicroShadowing by GetAmbientOcclusionForMicroShadowing
 - Rename WorldToTangent to TangentToWorld as it was incorrectly named
 - Remove SunDisk and Sun Halo size from directional light
+- Improved the Volume UI and made them Global by default
 
 
 ## [6.7.0-preview] - 2019-05-16
