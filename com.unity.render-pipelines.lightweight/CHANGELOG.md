@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added missing page for 2D Lights in LWRP.
 - Fixed warnings for unsupported shadow map formats for GLES2 API.
 - Disabled shadows for devices that do not support shadow maps or depth textures.
+- LWRP now preserves alpha when rendering to render textures. [case 1156134](https://issuetracker.unity3d.com/issues/lwrp-camera-with-target-render-texture-does-not-respect-transparent-background-color-in-windows-standalone-build)
 
 ## [6.7.0] - 2019-05-16
 ### Added
