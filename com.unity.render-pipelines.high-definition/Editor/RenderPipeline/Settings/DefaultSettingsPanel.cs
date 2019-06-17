@@ -1,11 +1,10 @@
-
-
 using System.Linq;
 using Object = UnityEngine.Object;
-#if QUALITY_SETTINGS_GET_RENDER_PIPELINE_AT_AVAILABLE
 using System;
 using System.Collections.Generic;
 using System.IO;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
 using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -66,8 +65,9 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             {
                 if (m_DefaultVolumeProfile == null || m_DefaultVolumeProfile.Equals(null))
                     m_DefaultVolumeProfile = GetOrCreateDefaultVolumeProfile();
-                
-                Editor.CreateCachedEditor(m_DefaultVolumeProfile, Type.GetType("UnityEditor.Rendering.VolumeProfileEditor"), ref m_Cached);
+
+                Editor.CreateCachedEditor(m_DefaultVolumeProfile,
+                    Type.GetType("UnityEditor.Rendering.VolumeProfileEditor"), ref m_Cached);
                 m_Cached.OnInspectorGUI();
             }
 
@@ -119,5 +119,15 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             }
         }
     }
+
+    class PreProcessBuild : IPreprocessBuildWithReport
+    {
+        public int callbackOrder { get; }
+
+        public void OnPreprocessBuild(BuildReport report)
+        {
+            // Create default settings volume profile if required
+            DefaultSettings.GetOrCreateDefaultVolume();
+        }
+    }
 }
-#endif
