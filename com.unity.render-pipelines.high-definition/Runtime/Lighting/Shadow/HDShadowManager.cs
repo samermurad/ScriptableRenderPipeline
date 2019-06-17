@@ -22,13 +22,12 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         public Vector4      proj;
 
         public Vector2      atlasOffset;
-        public float        edgeTolerance;
-        public int          flags;
+        public float        worldTexelSize;  // Needs to be texel size. 
+        public float        _padding;
 
         public Vector4      zBufferParam;
         public Vector4      shadowMapSize;
 
-        public Vector4      viewBias;
         public Vector3      normalBias;
         public float        constantBias;
 
@@ -51,14 +50,6 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
         [HLSLArray(4, typeof(float))]
         public fixed float      cascadeBorders[4];
-    }
-
-    [GenerateHLSL]
-    public enum HDShadowFlag
-    {
-        SampleBiasScale     = (1 << 0),
-        EdgeLeakFixup       = (1 << 1),
-        EdgeToleranceNormal = (1 << 2),
     }
 
     public class HDShadowRequest
@@ -88,10 +79,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         public ShadowSplitData      splitData;
         // end
 
-        public Vector4              viewBias;
         public Vector3              normalBias;
-        public float                edgeTolerance;
-        public int                  flags;
+        public float                worldTexelSize;
 
         public Vector4              TMP_otherBiases;
 
@@ -370,14 +359,12 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             float rWidth = 1.0f / atlas.width;
             float rHeight = 1.0f / atlas.height;
             data.atlasOffset = Vector2.Scale(new Vector2(rWidth, rHeight), new Vector2(shadowRequest.atlasViewport.x, shadowRequest.atlasViewport.y));
+            data.worldTexelSize = shadowRequest.worldTexelSize;
 
             data.shadowMapSize = new Vector4(shadowRequest.atlasViewport.width, shadowRequest.atlasViewport.height, 1.0f / shadowRequest.atlasViewport.width, 1.0f / shadowRequest.atlasViewport.height);
 
-            data.viewBias = shadowRequest.viewBias;
             data.constantBias = shadowRequest.TMP_otherBiases.x;
             data.normalBias = shadowRequest.normalBias;
-            data.flags = shadowRequest.flags;
-            data.edgeTolerance = shadowRequest.edgeTolerance;
 
             data.shadowFilterParams0.x = shadowRequest.shadowSoftness;
             data.shadowFilterParams0.y = HDShadowUtils.Asfloat(shadowRequest.blockerSampleCount);
