@@ -22,14 +22,16 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         public Vector4      proj;
 
         public Vector2      atlasOffset;
-        public float        worldTexelSize;  // Needs to be texel size. 
+        public float        worldTexelSize;
         public float        _padding;
 
         public Vector4      zBufferParam;
         public Vector4      shadowMapSize;
 
-        public Vector3      normalBias;
+        public float        normalBias;
         public float        constantBias;
+        public float        _padding1;
+        public float        _padding2;
 
         public Vector4      shadowFilterParams0;
 
@@ -79,7 +81,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         public ShadowSplitData      splitData;
         // end
 
-        public Vector3              normalBias;
+        public float                normalBias;
         public float                worldTexelSize;
 
         public Vector4              TMP_otherBiases;

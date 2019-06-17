@@ -125,15 +125,10 @@ float EvalShadow_WorldTexelSize(float worldTexelSize, float L_dist, bool perspPr
 }
 
 // receiver bias either using the normal to weight normal bias
-float3 EvalShadow_ReceiverBias(float worldTexelSize, float3 normalBias, float3 positionWS, float3 normalWS, float3 L, float L_dist, bool perspProj)
+float3 EvalShadow_ReceiverBias(float worldTexelSize, float normalBias, float3 positionWS, float3 normalWS, float3 L, float L_dist, bool perspProj)
 {
-    float normalBiasMin   = normalBias.x;
-    float normalBiasMax   = normalBias.y;
-    float normalBiasScale = normalBias.z;
-
     float  NdotL       = dot(normalWS, L);
-    float  sine        = sqrt(saturate(1.0 - NdotL * NdotL));
-    float3 normal_bias = normalWS * sine;
+    float3 normal_bias = normalWS * normalBias;
     return positionWS + normal_bias * EvalShadow_WorldTexelSize(worldTexelSize, L_dist, perspProj);
 }
 

@@ -79,9 +79,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             // Bias control
             public SerializedProperty constantBias;
 
-            public SerializedProperty normalBiasMin;
-            public SerializedProperty normalBiasMax;
-            public SerializedProperty normalBiasScale;
+            public SerializedProperty normalBias;
         }
 
         public bool needUpdateAreaLightEmissiveMeshComponents = false;
@@ -176,9 +174,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                     shadowTint = o.Find(x => x.shadowTint),                    
 
                     constantBias = o.Find(x => x.constantBias),
-                    normalBiasMin = o.Find(x => x.normalBiasMin),
-                    normalBiasMax = o.Find(x => x.normalBiasMax),
-                    normalBiasScale = o.Find(x => x.normalBiasScale),
+                    normalBias = o.Find(x => x.normalBias),
                 };
         }
 

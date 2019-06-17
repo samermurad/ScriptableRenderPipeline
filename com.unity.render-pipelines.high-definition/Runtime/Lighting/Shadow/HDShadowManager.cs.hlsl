@@ -18,8 +18,10 @@ struct HDShadowData
     float _padding;
     float4 zBufferParam;
     float4 shadowMapSize;
-    float3 normalBias;
+    float normalBias;
     float constantBias;
+    float _padding1;
+    float _padding2;
     float4 shadowFilterParams0;
     float4x4 shadowToWorld;
 };
@@ -76,13 +78,21 @@ float4 GetShadowMapSize(HDShadowData value)
 {
     return value.shadowMapSize;
 }
-float3 GetNormalBias(HDShadowData value)
+float GetNormalBias(HDShadowData value)
 {
     return value.normalBias;
 }
 float GetConstantBias(HDShadowData value)
 {
     return value.constantBias;
+}
+float Get_padding1(HDShadowData value)
+{
+    return value._padding1;
+}
+float Get_padding2(HDShadowData value)
+{
+    return value._padding2;
 }
 float4 GetShadowFilterParams0(HDShadowData value)
 {
