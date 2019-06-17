@@ -152,8 +152,8 @@ $precision {6} = {3} * 0.01;
 // Transform the view vector into the UV space.
 $precision3 {7}    = normalize($precision3({4}.xy * {6}, {4}.z)); // TODO: skip normalize
 
-PerPixelHeightDisplacementParam {1};
-{1}.uv = {2};",
+PerPixelHeightDisplacementParam {0};
+{0}.uv = {1};",
                 tmpPOMParam,
                 uvs,
                 CoordinateSpace.Tangent.ToVariableName(InterpolatorType.ViewDirection),
