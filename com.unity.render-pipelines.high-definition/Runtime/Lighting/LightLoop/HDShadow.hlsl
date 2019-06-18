@@ -3,7 +3,9 @@
 
 #define SHADOW_OPTIMIZE_REGISTER_USAGE 1
 
+#ifndef SHADOW_USE_DEPTH_BIAS
 #define SHADOW_USE_DEPTH_BIAS                   1   // Enable clip space z biasing
+#endif
 
 #if SHADOW_OPTIMIZE_REGISTER_USAGE == 1
 #   pragma warning( disable : 3557 ) // loop only executes for 1 iteration(s)

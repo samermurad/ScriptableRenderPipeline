@@ -23,7 +23,7 @@ namespace UnityEngine.Experimental.Rendering
         // bias control
         public float normalBias = 0.5f;
 
-        public float constantBias = 0.35f;
+        public float constantBias = 0.13f;
 
         [HideInInspector, SerializeField]
         private int shadowCascadeCount = 4;

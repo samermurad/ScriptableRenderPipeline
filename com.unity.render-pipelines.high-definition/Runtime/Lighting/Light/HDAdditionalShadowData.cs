@@ -9,7 +9,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             // Update bias control for HD
 
             // bias control default value based on empirical experiment
-            shadowData.constantBias         = 0.33f;
+            shadowData.constantBias         = 0.13f;
             shadowData.normalBias           = 0.5f;
         }
     }

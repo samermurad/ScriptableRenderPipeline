@@ -406,10 +406,11 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             return -offset;
         }
 
-        // TODO: Heuristics here can possibly be improved with more data points.
         private float GetDirectionalConstantBias(int index, float sphereRadius, float resolution)
         {
-            const float baseBias = 20.0f;
+            // TODO: Heuristics here can possibly be improved with more data points.
+
+            const float baseBias = 1.0f;
             float range = 0.0f;
             if (index == 0)
             {
@@ -424,14 +425,10 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                 range = m_ShadowSettings.cascadeShadowSplits[index] - m_ShadowSettings.cascadeShadowSplits[index - 1];
             }
 
-            float rangeRatio = range / m_ShadowSettings.cascadeShadowSplits[0];
             range *= m_ShadowSettings.maxShadowDistance.value;
+            float texelScale = (sphereRadius * sphereRadius) / resolution;
 
-            rangeRatio = Math.Min(rangeRatio * rangeRatio, 20.0f);
-
-            float texelScale = sphereRadius / resolution;
-
-            return baseBias * m_ShadowData.constantBias * texelScale * range * rangeRatio / m_ShadowSettings.maxShadowDistance.value;
+            return m_ShadowData.constantBias * texelScale * baseBias / range;
         }
 
         // Must return the first executed shadow request
@@ -471,7 +468,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                                 out invViewProjection, out shadowRequest.deviceProjectionYFlip,
                                 out shadowRequest.deviceProjection, out shadowRequest.splitData
                             );
-                            shadowRequest.constantBias = 0.05f * m_ShadowData.constantBias * legacyLight.range / viewportSize.x;
+                            shadowRequest.constantBias = Math.Max(0.0003f, 10.0f * m_ShadowData.constantBias / (legacyLight.range * viewportSize.x));
                             break;
                         case LightType.Spot:
                             HDShadowUtils.ExtractSpotLightData(
@@ -480,7 +477,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                                 out shadowRequest.view, out invViewProjection, out shadowRequest.deviceProjectionYFlip,
                                 out shadowRequest.deviceProjection, out shadowRequest.splitData
                             );
-                            shadowRequest.constantBias = 0.05f * m_ShadowData.constantBias * legacyLight.range / viewportSize.x;
+                            shadowRequest.constantBias = Math.Max(0.0003f, 10.0f * m_ShadowData.constantBias / (legacyLight.range * viewportSize.x));
                             break;
                         case LightType.Directional:
                             Vector4 cullingSphere;

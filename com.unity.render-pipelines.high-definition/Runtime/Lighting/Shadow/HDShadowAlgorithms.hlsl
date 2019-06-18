@@ -219,7 +219,7 @@ void LoadDirectionalShadowDatas(inout HDShadowData sd, HDShadowContext shadowCon
     sd.proj = shadowContext.shadowDatas[index].proj;
     sd.pos = shadowContext.shadowDatas[index].pos;
     sd.worldTexelSize = shadowContext.shadowDatas[index].worldTexelSize;
-   // sd.constantBias = shadowContext.shadowDatas[index].constantBias;
+    sd.constantBias = shadowContext.shadowDatas[index].constantBias;
     sd.atlasOffset = shadowContext.shadowDatas[index].atlasOffset;
 }
 
