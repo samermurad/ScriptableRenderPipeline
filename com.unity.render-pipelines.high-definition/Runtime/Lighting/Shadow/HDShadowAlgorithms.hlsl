@@ -119,13 +119,13 @@ uint2 EvalShadow_GetIntTexcoordsAtlas(HDShadowData sd, float4 atlasSize, float3 
 //
 
 // helper function to get the world texel size
-float EvalShadow_WorldTexelSize(float4 viewBias, float L_dist, bool perspProj)
+float EvalShadow_WorldTexelSize(float worldTexelSize, float L_dist, bool perspProj)
 {
-    return perspProj ? (viewBias.w * L_dist) : viewBias.w;
+    return perspProj ? (worldTexelSize * L_dist) : worldTexelSize;
 }
 
 // receiver bias either using the normal to weight normal and view biases, or just light view biasing
-float3 EvalShadow_ReceiverBias(float4 viewBias, float3 normalBias, float3 positionWS, float3 normalWS, float3 L, float L_dist, bool perspProj)
+float3 EvalShadow_ReceiverBias(float worldTexelSize, float3 normalBias, float3 positionWS, float3 normalWS, float3 L, float L_dist, bool perspProj)
 {
 #if SHADOW_USE_ONLY_VIEW_BASED_BIASING != 0 // only light vector based biasing
     return positionWS;
@@ -136,7 +136,7 @@ float3 EvalShadow_ReceiverBias(float4 viewBias, float3 normalBias, float3 positi
 
     float  NdotL       = dot(normalWS, L);
     float3 normal_bias = normalWS * normalBiasMin;
-    return positionWS + (normal_bias + 0) * EvalShadow_WorldTexelSize(viewBias, L_dist, perspProj);
+    return positionWS + (normal_bias + 0) * EvalShadow_WorldTexelSize(worldTexelSize, L_dist, perspProj);
 #endif
 }
 
@@ -215,7 +215,7 @@ float2 EvalShadow_SampleBias_Ortho(float3 normalWS)                             
 float EvalShadow_PunctualDepth(HDShadowData sd, Texture2D tex, SamplerComparisonState samp, float2 positionSS, float3 positionWS, float3 normalWS, float3 L, float L_dist, bool perspective)
 {
     /* bias the world position */
-    positionWS = EvalShadow_ReceiverBias(sd.viewBias, sd.normalBias, positionWS, normalWS, L, L_dist, perspective);
+    positionWS = EvalShadow_ReceiverBias(sd.worldTexelSize, sd.normalBias, positionWS, normalWS, L, L_dist, perspective);
     /* get shadowmap texcoords */
     float3 posTC = EvalShadow_GetTexcoordsAtlas(sd, _ShadowAtlasSize.zw, positionWS, perspective);
     /* get the per sample bias */
@@ -298,7 +298,8 @@ void LoadDirectionalShadowDatas(inout HDShadowData sd, HDShadowContext shadowCon
 {
     sd.proj = shadowContext.shadowDatas[index].proj;
     sd.pos = shadowContext.shadowDatas[index].pos;
-    sd.viewBias = shadowContext.shadowDatas[index].viewBias;
+    sd.worldTexelSize = shadowContext.shadowDatas[index].worldTexelSize;
+   // sd.constantBias = shadowContext.shadowDatas[index].constantBias;
     sd.atlasOffset = shadowContext.shadowDatas[index].atlasOffset;
 }
 
@@ -316,7 +317,7 @@ float EvalShadow_CascadedDepth_Blend(HDShadowContext shadowContext, Texture2D te
     
         /* normal based bias */
         float3 orig_pos = positionWS;
-        positionWS = EvalShadow_ReceiverBias(sd.viewBias, sd.normalBias, positionWS, normalWS, L, 1.0, false);
+        positionWS = EvalShadow_ReceiverBias(sd.worldTexelSize, sd.normalBias, positionWS, normalWS, L, 1.0, false);
     
         /* get shadowmap texcoords */
         float3 posTC = EvalShadow_GetTexcoordsAtlas(sd, _CascadeShadowAtlasSize.zw, positionWS, false);

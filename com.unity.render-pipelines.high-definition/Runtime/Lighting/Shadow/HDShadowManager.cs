@@ -28,7 +28,6 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         public Vector4      zBufferParam;
         public Vector4      shadowMapSize;
 
-        public Vector4      viewBias;
         public Vector3      normalBias;
         public float        constantBias;
 
@@ -88,9 +87,9 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         public ShadowSplitData      splitData;
         // end
 
-        public Vector4              viewBias;
         public Vector3              normalBias;
         public int                  flags;
+        public float                worldTexelSize; 
 
         public Vector4              TMP_otherBiases;
 
@@ -372,11 +371,10 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
             data.shadowMapSize = new Vector4(shadowRequest.atlasViewport.width, shadowRequest.atlasViewport.height, 1.0f / shadowRequest.atlasViewport.width, 1.0f / shadowRequest.atlasViewport.height);
 
-            data.viewBias = shadowRequest.viewBias;
             data.constantBias = shadowRequest.TMP_otherBiases.x;
             data.normalBias = shadowRequest.normalBias;
             data.flags = shadowRequest.flags;
-            data.worldTexelSize = shadowRequest.viewBias.w; // TODO_FCC: Change this skipping the bias altogether.
+            data.worldTexelSize = shadowRequest.worldTexelSize;
 
             data.shadowFilterParams0.x = shadowRequest.shadowSoftness;
             data.shadowFilterParams0.y = HDShadowUtils.Asfloat(shadowRequest.blockerSampleCount);
