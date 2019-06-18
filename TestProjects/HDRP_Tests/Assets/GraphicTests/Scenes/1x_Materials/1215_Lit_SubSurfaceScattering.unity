@@ -1164,11 +1164,6 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 114995348509370400, guid: c07ace9ab142ca9469fa377877c2f1e7,
-        type: 3}
-      propertyPath: xrLayout
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 20109210616973140, guid: c07ace9ab142ca9469fa377877c2f1e7,
         type: 3}
       propertyPath: far clip plane
