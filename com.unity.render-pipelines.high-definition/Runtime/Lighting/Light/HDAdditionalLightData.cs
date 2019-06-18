@@ -471,7 +471,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                                 out invViewProjection, out shadowRequest.deviceProjectionYFlip,
                                 out shadowRequest.deviceProjection, out shadowRequest.splitData
                             );
-                            shadowRequest.TMP_otherBiases = new Vector4(0.05f * m_ShadowData.constantBias * legacyLight.range / viewportSize.x , 0);
+                            shadowRequest.constantBias = 0.05f * m_ShadowData.constantBias * legacyLight.range / viewportSize.x;
                             break;
                         case LightType.Spot:
                             HDShadowUtils.ExtractSpotLightData(
@@ -480,7 +480,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                                 out shadowRequest.view, out invViewProjection, out shadowRequest.deviceProjectionYFlip,
                                 out shadowRequest.deviceProjection, out shadowRequest.splitData
                             );
-                            shadowRequest.TMP_otherBiases = new Vector4(0.05f * m_ShadowData.constantBias * legacyLight.range / viewportSize.x, 0);
+                            shadowRequest.constantBias = 0.05f * m_ShadowData.constantBias * legacyLight.range / viewportSize.x;
                             break;
                         case LightType.Directional:
                             Vector4 cullingSphere;
@@ -504,7 +504,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                             }
                             manager.UpdateCascade(index, cullingSphere, m_ShadowSettings.cascadeShadowBorders[index]);
 
-                            shadowRequest.TMP_otherBiases = new Vector4(GetDirectionalConstantBias(index, cullingSphere.w, viewportSize.x) /** (1/ranege)*/, 0);
+                            shadowRequest.constantBias = GetDirectionalConstantBias(index, cullingSphere.w, viewportSize.x);
                             break;
                     }
                 }
@@ -532,7 +532,6 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             shadowRequest.zBufferParam = new Vector4((f-n)/n, 1.0f, (f-n)/n*f, 1.0f/f);
             shadowRequest.worldTexelSize = 2.0f / shadowRequest.deviceProjectionYFlip.m00 / viewportSize.x * 1.4142135623730950488016887242097f;
             shadowRequest.normalBias = m_ShadowData.normalBias;
-            shadowRequest.flags = 0;
 
             // Make light position camera relative:
             // TODO: think about VR (use different camera position for each eye)

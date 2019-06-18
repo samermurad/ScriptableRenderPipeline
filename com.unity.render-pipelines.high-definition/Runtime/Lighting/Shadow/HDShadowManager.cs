@@ -23,15 +23,15 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
         public Vector2      atlasOffset;
         public float        worldTexelSize;
-        public int          flags;
+        public int          _pad0;
 
         public Vector4      zBufferParam;
         public Vector4      shadowMapSize;
 
         public float        normalBias;
-        public float        _tmp_pad0;
-        public float        _tmp_pad1;
         public float        constantBias;
+        public float        _pad1;
+        public float        _pad2;
 
         public Vector4      shadowFilterParams0;
 
@@ -52,14 +52,6 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
         [HLSLArray(4, typeof(float))]
         public fixed float      cascadeBorders[4];
-    }
-
-    [GenerateHLSL]
-    public enum HDShadowFlag
-    {
-        SampleBiasScale     = (1 << 0),
-        EdgeLeakFixup       = (1 << 1),
-        EdgeToleranceNormal = (1 << 2),
     }
 
     public class HDShadowRequest
@@ -90,10 +82,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         // end
 
         public float                normalBias;
-        public int                  flags;
-        public float                worldTexelSize; 
-
-        public Vector4              TMP_otherBiases;
+        public float                worldTexelSize;
+        public float                constantBias;
 
         // PCSS parameters
         public float                shadowSoftness;
@@ -373,9 +363,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
             data.shadowMapSize = new Vector4(shadowRequest.atlasViewport.width, shadowRequest.atlasViewport.height, 1.0f / shadowRequest.atlasViewport.width, 1.0f / shadowRequest.atlasViewport.height);
 
-            data.constantBias = shadowRequest.TMP_otherBiases.x;
+            data.constantBias = shadowRequest.constantBias;
             data.normalBias = shadowRequest.normalBias;
-            data.flags = shadowRequest.flags;
             data.worldTexelSize = shadowRequest.worldTexelSize;
 
             data.shadowFilterParams0.x = shadowRequest.shadowSoftness;

@@ -22,11 +22,13 @@ struct HDShadowData
     float4 proj;
     float2 atlasOffset;
     float worldTexelSize;
-    int flags;
+    int _pad0;
     float4 zBufferParam;
     float4 shadowMapSize;
-    float3 normalBias;
+    float normalBias;
     float constantBias;
+    float _pad1;
+    float _pad2;
     float4 shadowFilterParams0;
     float4x4 shadowToWorld;
 };
@@ -71,9 +73,9 @@ float GetWorldTexelSize(HDShadowData value)
 {
     return value.worldTexelSize;
 }
-int GetFlags(HDShadowData value)
+int Get_pad0(HDShadowData value)
 {
-    return value.flags;
+    return value._pad0;
 }
 float4 GetZBufferParam(HDShadowData value)
 {
@@ -83,13 +85,21 @@ float4 GetShadowMapSize(HDShadowData value)
 {
     return value.shadowMapSize;
 }
-float3 GetNormalBias(HDShadowData value)
+float GetNormalBias(HDShadowData value)
 {
     return value.normalBias;
 }
 float GetConstantBias(HDShadowData value)
 {
     return value.constantBias;
+}
+float Get_pad1(HDShadowData value)
+{
+    return value._pad1;
+}
+float Get_pad2(HDShadowData value)
+{
+    return value._pad2;
 }
 float4 GetShadowFilterParams0(HDShadowData value)
 {
