@@ -86,7 +86,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                                 case SpotLightShape.Box:
                                     using (new Handles.DrawingScope(Matrix4x4.TRS(light.transform.position, light.transform.rotation, Vector3.one)))
                                     {
-                                        Vector4 widthHeightMaxRangeMinRange = new Vector4(additionalData.shapeWidth, additionalData.shapeHeight, light.range);
+                                        Vector4 widthHeightMaxRangeMinRange = new Vector4(additionalData.shapeWidth, additionalData.m_ShapeHeight, light.range);
                                         Handles.zTest = UnityEngine.Rendering.CompareFunction.Greater;
                                         Handles.color = wireframeColorBehind;
                                         CoreLightEditorUtilities.DrawOrthoFrustumWireframe(widthHeightMaxRangeMinRange, additionalData.shadowNearPlane);
@@ -104,7 +104,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                                         {
                                             Undo.RecordObjects(new UnityEngine.Object[] { light, additionalData }, "Adjust Box Spot Light");
                                             additionalData.shapeWidth = widthHeightMaxRangeMinRange.x;
-                                            additionalData.shapeHeight = widthHeightMaxRangeMinRange.y;
+                                            additionalData.m_ShapeHeight = widthHeightMaxRangeMinRange.y;
                                             light.range = widthHeightMaxRangeMinRange.z;
                                         }
 
@@ -120,7 +120,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                     bool withYAxis = additionalData.lightTypeExtent == LightTypeExtent.Rectangle;
                     using (new Handles.DrawingScope(Matrix4x4.TRS(light.transform.position, light.transform.rotation, Vector3.one)))
                     {
-                        Vector2 widthHeight = new Vector4(additionalData.shapeWidth, withYAxis ? additionalData.shapeHeight : 0f);
+                        Vector2 widthHeight = new Vector4(additionalData.shapeWidth, withYAxis ? additionalData.m_ShapeHeight : 0f);
                         float range = light.range;
                         EditorGUI.BeginChangeCheck();
                         Handles.zTest = UnityEngine.Rendering.CompareFunction.Greater;
@@ -144,7 +144,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                             additionalData.shapeWidth = widthHeight.x;
                             if (withYAxis)
                             {
-                                additionalData.shapeHeight = widthHeight.y;
+                                additionalData.m_ShapeHeight = widthHeight.y;
                             }
                             light.range = range;
                         }

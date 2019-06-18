@@ -69,10 +69,17 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
 
             ApplyAdditionalComponentsVisibility(true);
 
+            EditorGUI.BeginChangeCheck();
             HDLightUI.Inspector.Draw(m_SerializedHDLight, this);
+            if (EditorGUI.EndChangeCheck())
+            {
+                m_SerializedHDLight.Apply();
 
-            m_SerializedHDLight.Apply();
+                foreach (var hdLightData in m_AdditionalLightDatas)
+                    hdLightData.SynchronizeLightValues();
+            }
 
+            // TODO: we don't need this anymore
             if (m_SerializedHDLight.needUpdateAreaLightEmissiveMeshComponents)
                 UpdateAreaLightEmissiveMeshComponents();
         }
