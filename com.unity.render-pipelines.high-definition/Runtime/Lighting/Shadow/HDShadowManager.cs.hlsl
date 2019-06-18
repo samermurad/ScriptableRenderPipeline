@@ -4,13 +4,6 @@
 
 #ifndef HDSHADOWMANAGER_CS_HLSL
 #define HDSHADOWMANAGER_CS_HLSL
-//
-// UnityEngine.Experimental.Rendering.HDPipeline.HDShadowFlag:  static fields
-//
-#define HDSHADOWFLAG_SAMPLE_BIAS_SCALE (1)
-#define HDSHADOWFLAG_EDGE_LEAK_FIXUP (2)
-#define HDSHADOWFLAG_EDGE_TOLERANCE_NORMAL (4)
-
 // Generated from UnityEngine.Experimental.Rendering.HDPipeline.HDShadowData
 // PackingRules = Exact
 struct HDShadowData
