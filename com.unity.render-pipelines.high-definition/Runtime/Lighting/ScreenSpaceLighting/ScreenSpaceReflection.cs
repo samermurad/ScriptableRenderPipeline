@@ -45,6 +45,9 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         // Tier 2 code
         [Tooltip("Number of samples for reflections.")]
         public ClampedIntParameter numSamples = new ClampedIntParameter(1, 1, 32);
+        
+        [Tooltip("Number of bounces for reflections.")]
+        public ClampedIntParameter numBounces = new ClampedIntParameter(1, 1, 31);
 
         static ScreenSpaceReflection s_Default = null;
         public static ScreenSpaceReflection @default
