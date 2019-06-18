@@ -28,7 +28,9 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         public Vector4      zBufferParam;
         public Vector4      shadowMapSize;
 
-        public Vector3      normalBias;
+        public float        normalBias;
+        public float        _tmp_pad0;
+        public float        _tmp_pad1;
         public float        constantBias;
 
         public Vector4      shadowFilterParams0;
@@ -87,7 +89,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         public ShadowSplitData      splitData;
         // end
 
-        public Vector3              normalBias;
+        public float                normalBias;
         public int                  flags;
         public float                worldTexelSize; 
 

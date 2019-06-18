@@ -21,10 +21,7 @@ namespace UnityEngine.Experimental.Rendering
         public bool contactShadows = false;
         public Color shadowTint = Color.black;
         // bias control
-        public float normalBiasMin = 0.2f;
-        public float normalBiasMax = 4.0f;
-        [Range(0.0F, 10.0F)]
-        public float normalBiasScale = 1.0f;
+        public float normalBias = 0.5f;
 
         public float constantBias = 0.35f;
 
@@ -53,9 +50,7 @@ namespace UnityEngine.Experimental.Rendering
             data.shadowFadeDistance = shadowFadeDistance;
             data.contactShadows = contactShadows;
             data.constantBias = constantBias;
-            data.normalBiasMin = normalBiasMin;
-            data.normalBiasMax = normalBiasMax;
-            data.normalBiasScale = normalBiasScale;
+            data.normalBias = normalBias;
             data.shadowCascadeCount = shadowCascadeCount;
             data.shadowCascadeRatios = new float[shadowCascadeRatios.Length];
             shadowCascadeRatios.CopyTo(data.shadowCascadeRatios, 0);

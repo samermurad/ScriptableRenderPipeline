@@ -674,12 +674,8 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                     EditorGUILayout.Slider(serialized.serializedShadowData.constantBias, 0.0f, 1.0f, s_Styles.constantScale);
 
                     EditorGUI.BeginChangeCheck();
-                    EditorGUILayout.Slider(serialized.serializedShadowData.normalBiasMin, 0.0f, 5.0f, s_Styles.normalBiasMin);
-                    if (EditorGUI.EndChangeCheck())
-                    {
-                        // Link min to max and don't expose normalBiasScale (useless when min == max)
-                        serialized.serializedShadowData.normalBiasMax.floatValue = serialized.serializedShadowData.normalBiasMin.floatValue;
-                    }
+                    EditorGUILayout.Slider(serialized.serializedShadowData.normalBias, 0.0f, 5.0f, s_Styles.normalBias);
+                    EditorGUI.EndChangeCheck();
                 }
 
                 // Dimmer and Tint don't have effect on baked shadow

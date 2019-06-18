@@ -125,19 +125,10 @@ float EvalShadow_WorldTexelSize(float worldTexelSize, float L_dist, bool perspPr
 }
 
 // receiver bias either using the normal to weight normal and view biases, or just light view biasing
-float3 EvalShadow_ReceiverBias(float worldTexelSize, float3 normalBias, float3 positionWS, float3 normalWS, float3 L, float L_dist, bool perspProj)
+float3 EvalShadow_ReceiverBias(float worldTexelSize, float normalBias, float3 positionWS, float3 normalWS, float3 L, float L_dist, bool perspProj)
 {
-#if SHADOW_USE_ONLY_VIEW_BASED_BIASING != 0 // only light vector based biasing
-    return positionWS;
-#else // biasing based on the angle between the normal and the light vector
-    float normalBiasMin   = normalBias.x;
-    float normalBiasMax   = normalBias.y;
-    float normalBiasScale = normalBias.z;
-
-    float  NdotL       = dot(normalWS, L);
-    float3 normal_bias = normalWS * normalBiasMin;
-    return positionWS + (normal_bias + 0) * EvalShadow_WorldTexelSize(worldTexelSize, L_dist, perspProj);
-#endif
+    float3 normal_bias = normalWS * normalBias;
+    return positionWS + (normal_bias) * EvalShadow_WorldTexelSize(worldTexelSize, L_dist, perspProj);
 }
 
 //
