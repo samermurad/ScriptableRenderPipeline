@@ -46,7 +46,7 @@ float SampleShadow_PCF_Tent_5x5(float4 shadowAtlasSize, float3 coord, Texture2D 
 
     SampleShadow_ComputeSamples_Tent_5x5(shadowAtlasSize, coord.xy, fetchesWeights, fetchesUV);
 
-#if SHADOW_OPTIMIZE_REGISTER_USAGE == 1 && SHADOW_USE_SAMPLE_BIASING == 0
+#if SHADOW_OPTIMIZE_REGISTER_USAGE == 1
     // the loops are only there to prevent the compiler form coalescing all 9 texture fetches which increases register usage
     int i;
     UNITY_LOOP
