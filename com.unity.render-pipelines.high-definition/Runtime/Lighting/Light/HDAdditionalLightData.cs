@@ -428,7 +428,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             range *= m_ShadowSettings.maxShadowDistance.value;
             float texelScale = (sphereRadius * sphereRadius) / resolution;
 
-            return m_ShadowData.constantBias * texelScale * baseBias / range;
+            return Math.Min(0.02f, m_ShadowData.constantBias * texelScale * baseBias / range);
         }
 
         // Must return the first executed shadow request
