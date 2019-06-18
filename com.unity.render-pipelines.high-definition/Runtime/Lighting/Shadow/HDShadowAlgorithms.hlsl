@@ -12,23 +12,23 @@
 #endif
 
 #ifdef SHADOW_LOW
-#define PUNCTUAL_FILTER_ALGORITHM(sd, posSS, posTC, sampleBias, tex, samp, bias) SampleShadow_PCF_Tent_3x3(_ShadowAtlasSize.zwxy, posTC, sampleBias, tex, samp, bias)
+#define PUNCTUAL_FILTER_ALGORITHM(sd, posSS, posTC, sampleBias, tex, samp, bias) SampleShadow_PCF_Tent_3x3(_ShadowAtlasSize.zwxy, posTC, 0, tex, samp, bias)
 #define DIRECTIONAL_FILTER_ALGORITHM(sd, posSS, posTC, sampleBias, tex, samp, bias) SampleShadow_PCF_Tent_5x5(_CascadeShadowAtlasSize.zwxy, posTC, sampleBias, tex, samp, bias)
 #endif
 #ifdef SHADOW_MEDIUM
-#define PUNCTUAL_FILTER_ALGORITHM(sd, posSS, posTC, sampleBias, tex, samp, bias) SampleShadow_PCF_Tent_5x5(_ShadowAtlasSize.zwxy, posTC, sampleBias, tex, samp, bias)
-#define DIRECTIONAL_FILTER_ALGORITHM(sd, posSS, posTC, sampleBias, tex, samp, bias) SampleShadow_PCF_Tent_7x7(_CascadeShadowAtlasSize.zwxy, posTC, sampleBias, tex, samp, bias)
+#define PUNCTUAL_FILTER_ALGORITHM(sd, posSS, posTC, sampleBias, tex, samp, bias) SampleShadow_PCF_Tent_5x5(_ShadowAtlasSize.zwxy, posTC, 0, tex, samp, bias)
+#define DIRECTIONAL_FILTER_ALGORITHM(sd, posSS, posTC, sampleBias, tex, samp, bias) SampleShadow_PCF_Tent_7x7(_CascadeShadowAtlasSize.zwxy, posTC, 0, tex, samp, bias)
 #endif
 // Note: currently quality settings for PCSS need to be expose in UI and is control in HDLightUI.cs file IsShadowSettings
 #ifdef SHADOW_HIGH
-#define PUNCTUAL_FILTER_ALGORITHM(sd, posSS, posTC, sampleBias, tex, samp, bias) SampleShadow_PCSS(posTC, posSS, sd.shadowMapSize.xy * _ShadowAtlasSize.zw, sd.atlasOffset, sampleBias, sd.shadowFilterParams0.x, sd.shadowFilterParams0.w, asint(sd.shadowFilterParams0.y), asint(sd.shadowFilterParams0.z), tex, samp, s_point_clamp_sampler)
+#define PUNCTUAL_FILTER_ALGORITHM(sd, posSS, posTC, sampleBias, tex, samp, bias) SampleShadow_PCSS(posTC, posSS, sd.shadowMapSize.xy * _ShadowAtlasSize.zw, sd.atlasOffset, 0, sd.shadowFilterParams0.x, sd.shadowFilterParams0.w, asint(sd.shadowFilterParams0.y), asint(sd.shadowFilterParams0.z), tex, samp, s_point_clamp_sampler)
 // Currently PCSS is broken on directional light
-#define DIRECTIONAL_FILTER_ALGORITHM(sd, posSS, posTC, sampleBias, tex, samp, bias) SampleShadow_PCSS(posTC, posSS, sd.shadowMapSize.xy * _CascadeShadowAtlasSize.zw, sd.atlasOffset, sampleBias, sd.shadowFilterParams0.x, sd.shadowFilterParams0.w, asint(sd.shadowFilterParams0.y), asint(sd.shadowFilterParams0.z), tex, samp, s_point_clamp_sampler)
+#define DIRECTIONAL_FILTER_ALGORITHM(sd, posSS, posTC, sampleBias, tex, samp, bias) SampleShadow_PCSS(posTC, posSS, sd.shadowMapSize.xy * _CascadeShadowAtlasSize.zw, sd.atlasOffset, 0, sd.shadowFilterParams0.x, sd.shadowFilterParams0.w, asint(sd.shadowFilterParams0.y), asint(sd.shadowFilterParams0.z), tex, samp, s_point_clamp_sampler)
 #endif
 
 #ifdef SHADOW_VERY_HIGH
-#define PUNCTUAL_FILTER_ALGORITHM(sd, posSS, posTC, sampleBias, tex, samp, bias) SampleShadow_PCSS(posTC, posSS, sd.shadowMapSize.xy * _ShadowAtlasSize.zw, sd.atlasOffset, sampleBias, sd.shadowFilterParams0.x, sd.shadowFilterParams0.w, asint(sd.shadowFilterParams0.y), asint(sd.shadowFilterParams0.z), tex, samp, s_point_clamp_sampler)
-#define DIRECTIONAL_FILTER_ALGORITHM(sd, posSS, posTC, sampleBias, tex, samp, bias) SampleShadow_IMS(sd, posTC, sampleBias.x, sd.shadowFilterParams0.x, sd.shadowFilterParams0.y, sd.shadowFilterParams0.z)
+#define PUNCTUAL_FILTER_ALGORITHM(sd, posSS, posTC, sampleBias, tex, samp, bias) SampleShadow_PCSS(posTC, posSS, sd.shadowMapSize.xy * _ShadowAtlasSize.zw, sd.atlasOffset, 0, sd.shadowFilterParams0.x, sd.shadowFilterParams0.w, asint(sd.shadowFilterParams0.y), asint(sd.shadowFilterParams0.z), tex, samp, s_point_clamp_sampler)
+#define DIRECTIONAL_FILTER_ALGORITHM(sd, posSS, posTC, sampleBias, tex, samp, bias) SampleShadow_IMS(sd, posTC, 0.x, sd.shadowFilterParams0.x, sd.shadowFilterParams0.y, sd.shadowFilterParams0.z)
 #endif
 
 #ifndef PUNCTUAL_FILTER_ALGORITHM
@@ -124,67 +124,19 @@ float EvalShadow_WorldTexelSize(float4 viewBias, float L_dist, bool perspProj)
     return perspProj ? (viewBias.w * L_dist) : viewBias.w;
 }
 
-// used to scale down view biases to mitigate light leaking across shadowed corners
-#if SHADOW_USE_VIEW_BIAS_SCALING != 0
-float EvalShadow_ReceiverBiasWeightFlag(int flag)
-{
-    return (flag & HDSHADOWFLAG_EDGE_LEAK_FIXUP) ? 1.0 : 0.0;
-}
-
-bool EvalShadow_ReceiverBiasWeightUseNormalFlag(int flag)
-{
-    return (flag & HDSHADOWFLAG_EDGE_TOLERANCE_NORMAL) ? true : false;
-}
-
-float3 EvalShadow_ReceiverBiasWeightPos(float3 positionWS, float3 normalWS, float3 L, float worldTexelSize, float tolerance, bool useNormal)
-{
-#if SHADOW_USE_ONLY_VIEW_BASED_BIASING != 0
-    return positionWS + L * worldTexelSize * tolerance;
-#else
-    return positionWS + (useNormal ? normalWS : L) * worldTexelSize * tolerance;
-#endif
-}
-
-float EvalShadow_ReceiverBiasWeight(HDShadowData sd, float2 atlasSizeRcp, float2 offset, float4 viewBias, float edgeTolerance, int flags, Texture2D tex, SamplerComparisonState samp, float3 positionWS, float3 normalWS, float3 L, float L_dist, bool perspProj)
-{
-    float3 pos = EvalShadow_ReceiverBiasWeightPos(positionWS, normalWS, L, EvalShadow_WorldTexelSize(viewBias, L_dist, perspProj), edgeTolerance, EvalShadow_ReceiverBiasWeightUseNormalFlag(flags));
-    float t = SAMPLE_TEXTURE2D_SHADOW(tex, samp, EvalShadow_GetTexcoordsAtlas(sd, atlasSizeRcp, pos, perspProj)).x;
-    return lerp(1.0, t, EvalShadow_ReceiverBiasWeightFlag(flags));
-}
-
-float EvalShadow_ReceiverBiasWeight(Texture2D tex, SamplerState samp, float3 positionWS, float3 normalWS, float3 L, float L_dist, bool perspProj)
-{
-    // only used by PCF filters
-    return 1.0;
-}
-#else // SHADOW_USE_VIEW_BIAS_SCALING != 0
-float EvalShadow_ReceiverBiasWeight(HDShadowData sd, float2 atlasSizeRcp, float2 offset, float4 viewBias, float edgeTolerance, int flags, Texture2D tex, SamplerComparisonState samp, float3 positionWS, float3 normalWS, float3 L, float L_dist, bool perspProj) { return 0; }
-float EvalShadow_ReceiverBiasWeight (Texture2D tex, SamplerState samp, float3 positionWS, float3 normalWS, float3 L, float L_dist, bool perspProj)                                                                                                                { return 0; }
-#endif // SHADOW_USE_VIEW_BIAS_SCALING != 0
-
-
 // receiver bias either using the normal to weight normal and view biases, or just light view biasing
-float3 EvalShadow_ReceiverBias(float4 viewBias, float3 normalBias, float3 positionWS, float3 normalWS, float3 L, float L_dist, float lightviewBiasWeight, bool perspProj)
+float3 EvalShadow_ReceiverBias(float4 viewBias, float3 normalBias, float3 positionWS, float3 normalWS, float3 L, float L_dist, bool perspProj)
 {
 #if SHADOW_USE_ONLY_VIEW_BASED_BIASING != 0 // only light vector based biasing
-    float viewBiasScale = viewBias.z;
-    return positionWS + L * viewBiasScale * lightviewBiasWeight * EvalShadow_WorldTexelSize(viewBias, L_dist, perspProj);
+    return positionWS;
 #else // biasing based on the angle between the normal and the light vector
-    float viewBiasMin   = viewBias.x;
-    float viewBiasMax   = viewBias.y;
-    float viewBiasScale = viewBias.z;
     float normalBiasMin   = normalBias.x;
     float normalBiasMax   = normalBias.y;
     float normalBiasScale = normalBias.z;
 
     float  NdotL       = dot(normalWS, L);
-    float  sine        = sqrt(saturate(1.0 - NdotL * NdotL));
-    float  tangent     = abs(NdotL) > 0.0 ? (sine / NdotL) : 0.0;
-           sine        = clamp(sine    * normalBiasScale, normalBiasMin, normalBiasMax);
-           tangent     = clamp(tangent * viewBiasScale * lightviewBiasWeight, viewBiasMin, viewBiasMax);
-    float3 view_bias   = L        * tangent;
-    float3 normal_bias = normalWS * sine;
-    return positionWS + (normal_bias + view_bias) * EvalShadow_WorldTexelSize(viewBias, L_dist, perspProj);
+    float3 normal_bias = normalWS * normalBiasMin;
+    return positionWS + (normal_bias + 0) * EvalShadow_WorldTexelSize(viewBias, L_dist, perspProj);
 #endif
 }
 
@@ -263,8 +215,7 @@ float2 EvalShadow_SampleBias_Ortho(float3 normalWS)                             
 float EvalShadow_PunctualDepth(HDShadowData sd, Texture2D tex, SamplerComparisonState samp, float2 positionSS, float3 positionWS, float3 normalWS, float3 L, float L_dist, bool perspective)
 {
     /* bias the world position */
-    float recvBiasWeight = EvalShadow_ReceiverBiasWeight(sd, _ShadowAtlasSize.zw, sd.atlasOffset, sd.viewBias, sd.edgeTolerance, sd.flags, tex, samp, positionWS, normalWS, L, L_dist, perspective);
-    positionWS = EvalShadow_ReceiverBias(sd.viewBias, sd.normalBias, positionWS, normalWS, L, L_dist, recvBiasWeight, perspective);
+    positionWS = EvalShadow_ReceiverBias(sd.viewBias, sd.normalBias, positionWS, normalWS, L, L_dist, perspective);
     /* get shadowmap texcoords */
     float3 posTC = EvalShadow_GetTexcoordsAtlas(sd, _ShadowAtlasSize.zw, positionWS, perspective);
     /* get the per sample bias */
@@ -365,14 +316,12 @@ float EvalShadow_CascadedDepth_Blend(HDShadowContext shadowContext, Texture2D te
     
         /* normal based bias */
         float3 orig_pos = positionWS;
-        float recvBiasWeight = EvalShadow_ReceiverBiasWeight(sd, _CascadeShadowAtlasSize.zw, sd.atlasOffset, sd.viewBias, sd.edgeTolerance, sd.flags, tex, samp, positionWS, normalWS, L, 1.0, false);
-        positionWS = EvalShadow_ReceiverBias(sd.viewBias, sd.normalBias, positionWS, normalWS, L, 1.0, recvBiasWeight, false);
+        positionWS = EvalShadow_ReceiverBias(sd.viewBias, sd.normalBias, positionWS, normalWS, L, 1.0, false);
     
         /* get shadowmap texcoords */
         float3 posTC = EvalShadow_GetTexcoordsAtlas(sd, _CascadeShadowAtlasSize.zw, positionWS, false);
         /* evalute the first cascade */
-        float2 sampleBias = EvalShadow_SampleBias_Ortho(normalWS);
-        shadow            = DIRECTIONAL_FILTER_ALGORITHM(sd, positionSS, posTC, sampleBias, tex, samp, sd.constantBias);
+        shadow = DIRECTIONAL_FILTER_ALGORITHM(sd, positionSS, posTC, /* TODO_FCC: REMOVE THIS? sampleBias */ 0.0f, tex, samp, sd.constantBias);
         float  shadow1    = 1.0;
     
         shadowSplitIndex++;
@@ -383,15 +332,12 @@ float EvalShadow_CascadedDepth_Blend(HDShadowContext shadowContext, Texture2D te
             if (alpha > 0.0)
             {
                 LoadDirectionalShadowDatas(sd, shadowContext, index + shadowSplitIndex);
-                positionWS = EvalShadow_ReceiverBias(sd.viewBias, sd.normalBias, orig_pos, normalWS, L, 1.0, recvBiasWeight, false);
                 float3 posNDC;
                 posTC = EvalShadow_GetTexcoordsAtlas(sd, _CascadeShadowAtlasSize.zw, positionWS, posNDC, false);
-                /* sample the texture */
-                sampleBias = EvalShadow_SampleBias_Ortho(normalWS);
-    
+                /* sample the texture */    
                 UNITY_BRANCH
                 if (all(abs(posNDC.xy) <= (1.0 - sd.shadowMapSize.zw * 0.5)))
-                    shadow1 = DIRECTIONAL_FILTER_ALGORITHM(sd, positionSS, posTC, sampleBias, tex, samp, sd.constantBias);
+                    shadow1 = DIRECTIONAL_FILTER_ALGORITHM(sd, positionSS, posTC, /* TODO_FCC: REMOVE THIS? sampleBias */ 0.0f, tex, samp, sd.constantBias);
             }
         }
         shadow = lerp(shadow, shadow1, alpha);

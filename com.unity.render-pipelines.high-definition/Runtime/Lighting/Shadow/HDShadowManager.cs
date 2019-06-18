@@ -22,7 +22,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         public Vector4      proj;
 
         public Vector2      atlasOffset;
-        public float        edgeTolerance;
+        public float        worldTexelSize;
         public int          flags;
 
         public Vector4      zBufferParam;
@@ -90,7 +90,6 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
         public Vector4              viewBias;
         public Vector3              normalBias;
-        public float                edgeTolerance;
         public int                  flags;
 
         public Vector4              TMP_otherBiases;
@@ -377,7 +376,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             data.constantBias = shadowRequest.TMP_otherBiases.x;
             data.normalBias = shadowRequest.normalBias;
             data.flags = shadowRequest.flags;
-            data.edgeTolerance = shadowRequest.edgeTolerance;
+            data.worldTexelSize = shadowRequest.viewBias.w; // TODO_FCC: Change this skipping the bias altogether.
 
             data.shadowFilterParams0.x = shadowRequest.shadowSoftness;
             data.shadowFilterParams0.y = HDShadowUtils.Asfloat(shadowRequest.blockerSampleCount);

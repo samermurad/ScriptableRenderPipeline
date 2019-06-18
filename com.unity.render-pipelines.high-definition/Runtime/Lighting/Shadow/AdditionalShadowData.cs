@@ -21,19 +21,11 @@ namespace UnityEngine.Experimental.Rendering
         public bool contactShadows = false;
         public Color shadowTint = Color.black;
         // bias control
-        public float viewBiasMin = 0.5f;
-        public float viewBiasMax = 10f;
-        [Range(0.0F, 15.0F)]
-        public float viewBiasScale = 1.0f;
         public float normalBiasMin = 0.2f;
         public float normalBiasMax = 4.0f;
         [Range(0.0F, 10.0F)]
         public float normalBiasScale = 1.0f;
         public bool sampleBiasScale = true;
-        public bool edgeLeakFixup = false; // Causes large banding artifacts
-        public bool edgeToleranceNormal = false;
-        [Range(0.0F, 1.0F)]
-        public float edgeTolerance = 1.0f;
 
         public float constantBias = 0.33f;
 
@@ -61,17 +53,11 @@ namespace UnityEngine.Experimental.Rendering
             data.volumetricShadowDimmer = volumetricShadowDimmer;
             data.shadowFadeDistance = shadowFadeDistance;
             data.contactShadows = contactShadows;
-            data.viewBiasMin = viewBiasMin;
-            data.viewBiasMax = viewBiasMax;
-            data.viewBiasScale = viewBiasScale;
             data.constantBias = constantBias;
             data.normalBiasMin = normalBiasMin;
             data.normalBiasMax = normalBiasMax;
             data.normalBiasScale = normalBiasScale;
             data.sampleBiasScale = sampleBiasScale;
-            data.edgeLeakFixup = edgeLeakFixup;
-            data.edgeToleranceNormal = edgeToleranceNormal;
-            data.edgeTolerance = edgeTolerance;
             data.shadowCascadeCount = shadowCascadeCount;
             data.shadowCascadeRatios = new float[shadowCascadeRatios.Length];
             shadowCascadeRatios.CopyTo(data.shadowCascadeRatios, 0);

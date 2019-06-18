@@ -77,18 +77,12 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             public SerializedProperty shadowTint;            
 
             // Bias control
-            public SerializedProperty viewBiasMin;
-            public SerializedProperty viewBiasMax;
-            public SerializedProperty viewBiasScale;
             public SerializedProperty constantBias;
 
             public SerializedProperty normalBiasMin;
             public SerializedProperty normalBiasMax;
             public SerializedProperty normalBiasScale;
             public SerializedProperty sampleBiasScale;
-            public SerializedProperty edgeLeakFixup;
-            public SerializedProperty edgeToleranceNormal;
-            public SerializedProperty edgeTolerance;
         }
 
         public bool needUpdateAreaLightEmissiveMeshComponents = false;
@@ -182,17 +176,11 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                     contactShadows = o.Find(x => x.contactShadows),
                     shadowTint = o.Find(x => x.shadowTint),                    
 
-                    viewBiasMin = o.Find(x => x.viewBiasMin),
-                    viewBiasMax = o.Find(x => x.viewBiasMax),
-                    viewBiasScale = o.Find(x => x.viewBiasScale),
                     constantBias = o.Find(x => x.constantBias),
                     normalBiasMin = o.Find(x => x.normalBiasMin),
                     normalBiasMax = o.Find(x => x.normalBiasMax),
                     normalBiasScale = o.Find(x => x.normalBiasScale),
                     sampleBiasScale = o.Find(x => x.sampleBiasScale),
-                    edgeLeakFixup = o.Find(x => x.edgeLeakFixup),
-                    edgeToleranceNormal = o.Find(x => x.edgeToleranceNormal),
-                    edgeTolerance = o.Find(x => x.edgeTolerance)
                 };
         }
 
