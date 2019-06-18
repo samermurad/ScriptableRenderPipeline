@@ -533,7 +533,6 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             shadowRequest.worldTexelSize = 2.0f / shadowRequest.deviceProjectionYFlip.m00 / viewportSize.x * 1.4142135623730950488016887242097f;
             shadowRequest.normalBias = new Vector3(m_ShadowData.normalBiasMin, m_ShadowData.normalBiasMax, m_ShadowData.normalBiasScale);
             shadowRequest.flags = 0;
-            shadowRequest.flags |= m_ShadowData.sampleBiasScale     ? (int)HDShadowFlag.SampleBiasScale : 0;
 
             // Make light position camera relative:
             // TODO: think about VR (use different camera position for each eye)

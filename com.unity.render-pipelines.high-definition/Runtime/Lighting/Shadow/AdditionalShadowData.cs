@@ -25,9 +25,8 @@ namespace UnityEngine.Experimental.Rendering
         public float normalBiasMax = 4.0f;
         [Range(0.0F, 10.0F)]
         public float normalBiasScale = 1.0f;
-        public bool sampleBiasScale = true;
 
-        public float constantBias = 0.33f;
+        public float constantBias = 0.35f;
 
         [HideInInspector, SerializeField]
         private int shadowCascadeCount = 4;
@@ -57,7 +56,6 @@ namespace UnityEngine.Experimental.Rendering
             data.normalBiasMin = normalBiasMin;
             data.normalBiasMax = normalBiasMax;
             data.normalBiasScale = normalBiasScale;
-            data.sampleBiasScale = sampleBiasScale;
             data.shadowCascadeCount = shadowCascadeCount;
             data.shadowCascadeRatios = new float[shadowCascadeRatios.Length];
             shadowCascadeRatios.CopyTo(data.shadowCascadeRatios, 0);

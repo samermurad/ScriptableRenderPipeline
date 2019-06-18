@@ -82,7 +82,6 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             public SerializedProperty normalBiasMin;
             public SerializedProperty normalBiasMax;
             public SerializedProperty normalBiasScale;
-            public SerializedProperty sampleBiasScale;
         }
 
         public bool needUpdateAreaLightEmissiveMeshComponents = false;
@@ -180,7 +179,6 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                     normalBiasMin = o.Find(x => x.normalBiasMin),
                     normalBiasMax = o.Find(x => x.normalBiasMax),
                     normalBiasScale = o.Find(x => x.normalBiasScale),
-                    sampleBiasScale = o.Find(x => x.sampleBiasScale),
                 };
         }
 
