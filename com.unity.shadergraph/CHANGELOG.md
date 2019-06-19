@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - You can now use the `SHADERGRAPH_PREVIEW` keyword in `Custom Function Node` to generate different code for preview Shaders.
 - Color Mode improves node visibility by coloring the title bar by Category, Precision, or custom colors.
 - You can now set the precision of a Shader Graph and individual nodes.
+- Added _TimeParameters variable containing Time, Sin(Time), Cosine(Time)
 
 ### Changed
 - The `Custom Function Node` now uses an object field to reference its source when using `File` mode.
