@@ -54,8 +54,9 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             else
 #endif
             {
-                if (XRGraphics.stereoRenderingMode == XRGraphics.StereoRenderingMode.SinglePassInstanced)
-                    maxViews = 2;
+                // TEMP !! do not merge into final PR
+                //if (XRGraphics.stereoRenderingMode == XRGraphics.StereoRenderingMode.SinglePassInstanced)
+                //    maxViews = 2;
             }
 
             return maxViews;
@@ -110,26 +111,26 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             if (display == null)
                 return;
 
-            cmd.SetRenderTarget(new RenderTargetIdentifier(BuiltinRenderTextureType.CameraTarget));
-            //cmd.SetViewport(hdCamera.camera.pixelRect);
-
-            display.GetMirrorViewBlitDesc(RenderTexture.active, out var blitDesc);
-            for (int i = 0; i < blitDesc.blitParamsCount; ++i)
+            using (new ProfilingSample(cmd, "XR Mirror View"))
             {
-                blitDesc.GetBlitParameter(i, out var blitParam);
+                cmd.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 
-                //cmd.SetViewport(blitParameter.destRect);
+                display.GetMirrorViewBlitDesc(null, out var blitDesc);
+                for (int i = 0; i < blitDesc.blitParamsCount; ++i)
+                {
+                    blitDesc.GetBlitParameter(i, out var blitParam);
 
-                Vector4 scaleBias = new Vector4(blitParam.srcRect.width, blitParam.srcRect.height, blitParam.srcRect.x, blitParam.srcRect.y);
-                Vector4 scaleBiasRT = new Vector4(blitParam.destRect.width, blitParam.destRect.height, blitParam.destRect.x, blitParam.destRect.y);
+                    Vector4 scaleBias = new Vector4(blitParam.srcRect.width, blitParam.srcRect.height, blitParam.srcRect.x, blitParam.srcRect.y);
+                    Vector4 scaleBiasRT = new Vector4(blitParam.destRect.width, blitParam.destRect.height, blitParam.destRect.x, blitParam.destRect.y);
 
-                mirrorViewMaterialProperty.SetTexture(HDShaderIDs._BlitTexture, blitParam.srcTex);
-                mirrorViewMaterialProperty.SetVector(HDShaderIDs._BlitScaleBias, scaleBias);
-                mirrorViewMaterialProperty.SetVector(HDShaderIDs._BlitScaleBiasRt, scaleBiasRT);
-                mirrorViewMaterialProperty.SetInt(HDShaderIDs._BlitTexArraySlice, blitParam.srcTexArraySlice);
+                    mirrorViewMaterialProperty.SetTexture(HDShaderIDs._BlitTexture, blitParam.srcTex);
+                    mirrorViewMaterialProperty.SetVector(HDShaderIDs._BlitScaleBias, scaleBias);
+                    mirrorViewMaterialProperty.SetVector(HDShaderIDs._BlitScaleBiasRt, scaleBiasRT);
+                    mirrorViewMaterialProperty.SetInt(HDShaderIDs._BlitTexArraySlice, blitParam.srcTexArraySlice);
 
-                int shaderPass = (blitParam.srcTex.dimension == TextureDimension.Tex2DArray) ? 1 : 0;
-                cmd.DrawProcedural(Matrix4x4.identity, mirrorViewMaterial, shaderPass, MeshTopology.Triangles, 3, 1, mirrorViewMaterialProperty);
+                    int shaderPass = (blitParam.srcTex.dimension == TextureDimension.Tex2DArray) ? 1 : 0;
+                    cmd.DrawProcedural(Matrix4x4.identity, mirrorViewMaterial, shaderPass, MeshTopology.Triangles, 3, 1, mirrorViewMaterialProperty);
+                }
             }
 #endif
         }
