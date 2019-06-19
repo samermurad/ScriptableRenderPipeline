@@ -40,7 +40,7 @@ AttributesMesh ApplyMeshModification(AttributesMesh input, float3 timeParameters
     // build graph inputs
     VertexDescriptionInputs vertexDescriptionInputs = AttributesMeshToVertexDescriptionInputs(input);
     // Override time paramters with used one (This is required to correctly handle motion vector for vertex animation based on time)
-    $VertexDescriptionInputs.Time:      vertexDescriptionInputs.TimeParameters = timeParameters;
+    $VertexDescriptionInputs.TimeParameters: vertexDescriptionInputs.TimeParameters = timeParameters;
 
     // evaluate vertex graph
     VertexDescription vertexDescription = VertexDescriptionFunction(vertexDescriptionInputs);
