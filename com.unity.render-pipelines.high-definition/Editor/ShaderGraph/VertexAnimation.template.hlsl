@@ -35,13 +35,12 @@ VertexDescriptionInputs AttributesMeshToVertexDescriptionInputs(AttributesMesh i
     return output;
 }
 
-AttributesMesh ApplyMeshModification(AttributesMesh input, float time, float sinTime, float cosTime)
+AttributesMesh ApplyMeshModification(AttributesMesh input, float3 timeParameters)
 {
     // build graph inputs
     VertexDescriptionInputs vertexDescriptionInputs = AttributesMeshToVertexDescriptionInputs(input);
-    $VertexDescriptionInputs.Time:      vertexDescriptionInputs.Time = time;
-    $VertexDescriptionInputs.SinTime:   vertexDescriptionInputs.SinTime = sinTime;
-    $VertexDescriptionInputs.CosTime:   vertexDescriptionInputs.CosTime = cosTime;
+    // Override time paramters with used one (This is required to correctly handle motion vector for vertex animation based on time)
+    $VertexDescriptionInputs.Time:      vertexDescriptionInputs.TimeParameters = timeParameters;
 
     // evaluate vertex graph
     VertexDescription vertexDescription = VertexDescriptionFunction(vertexDescriptionInputs);

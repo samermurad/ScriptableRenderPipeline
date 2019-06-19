@@ -152,9 +152,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             [Optional] Vector4 uv3;
             [Optional] Vector4 VertexColor;
             [Optional] float FaceSign;
-            [Optional] float Time;
-            [Optional] float SinTime;
-            [Optional] float CosTime;
+            [Optional] Vector3 TimeParameters;
 
             public static Dependency[] dependencies = new Dependency[]
             {
@@ -228,9 +226,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             [Optional] Vector4 uv2;
             [Optional] Vector4 uv3;
             [Optional] Vector4 VertexColor;
-            [Optional] float Time;
-            [Optional] float SinTime;
-            [Optional] float CosTime;
+            [Optional] Vector3 TimeParameters;
 
             public static Dependency[] dependencies = new Dependency[]
             {                                                                       // TODO: NOCHECKIN: these dependencies are not correct for vertex pass
@@ -363,9 +359,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
 
             if (requirements.requiresTime)
             {
-                activeFields.Add("VertexDescriptionInputs.Time");
-                activeFields.Add("VertexDescriptionInputs.SinTime");
-                activeFields.Add("VertexDescriptionInputs.CosTime");
+                activeFields.Add("VertexDescriptionInputs.TimeParameters");
             }
         }
 
@@ -469,9 +463,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
 
             if (requirements.requiresTime)
             {
-                activeFields.Add("SurfaceDescriptionInputs.Time");
-                activeFields.Add("SurfaceDescriptionInputs.SinTime");
-                activeFields.Add("SurfaceDescriptionInputs.CosTime");
+                activeFields.Add("SurfaceDescriptionInputs.TimeParameters");
             }
         }
 

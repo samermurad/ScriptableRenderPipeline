@@ -58,9 +58,7 @@
         $SurfaceDescriptionInputs.uv3:                       output.uv3 =                         input.texCoord3;
         $SurfaceDescriptionInputs.VertexColor:               output.VertexColor =                 input.color;
         $SurfaceDescriptionInputs.FaceSign:                  output.FaceSign =                    input.isFrontFace;
-        $SurfaceDescriptionInputs.Time:                      output.Time =                        _Time.y;
-        $SurfaceDescriptionInputs.SinTime:                   output.SinTime =                     _SinTime.w;
-        $SurfaceDescriptionInputs.CosTime:                   output.CosTime =                     _CosTime.w;
+        $SurfaceDescriptionInputs.TimeParameters:            output.TimeParameters =              _TimeParameters.xyz; // This is mainly for LW as HD overwrite this value
 
         return output;
     }

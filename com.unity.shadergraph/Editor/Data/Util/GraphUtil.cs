@@ -1164,9 +1164,7 @@ namespace UnityEditor.ShaderGraph
 
                 if (requirements.requiresTime)
                 {
-                    sb.AppendLine("float {0};", ShaderGeneratorNames.Time);
-                    sb.AppendLine("float {0};", ShaderGeneratorNames.SinTime);
-                    sb.AppendLine("float {0};", ShaderGeneratorNames.CosTime);
+                    sb.AppendLine("float3 {0};", ShaderGeneratorNames.TimeParameters);
                 }
             }
         }
@@ -1195,9 +1193,7 @@ namespace UnityEditor.ShaderGraph
 
             if (requirements.requiresTime)
             {
-                sb.AppendLine($"{variableName}.{ShaderGeneratorNames.Time} = {ShaderGeneratorNames.Time};");
-                sb.AppendLine($"{variableName}.{ShaderGeneratorNames.SinTime} = {ShaderGeneratorNames.SinTime};");
-                sb.AppendLine($"{variableName}.{ShaderGeneratorNames.CosTime} = {ShaderGeneratorNames.CosTime};");
+                sb.AppendLine($"{variableName}.{ShaderGeneratorNames.TimeParameters} = {ShaderGeneratorNames.TimeParameters};");
             }
         }
 

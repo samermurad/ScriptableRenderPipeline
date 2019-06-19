@@ -225,9 +225,7 @@ namespace UnityEditor.Experimental.Rendering.LWRP
 
                 if (vertexRequirements.requiresTime)
                 {
-                    vertexDescriptionInputStruct.AppendLine("float {0};", ShaderGeneratorNames.Time);
-                    vertexDescriptionInputStruct.AppendLine("float {0};", ShaderGeneratorNames.SinTime);
-                    vertexDescriptionInputStruct.AppendLine("float {0};", ShaderGeneratorNames.CosTime);
+                    vertexDescriptionInputStruct.AppendLine("float3 {0};", ShaderGeneratorNames.TimeParameters);
                 }
             }
 
@@ -279,9 +277,7 @@ namespace UnityEditor.Experimental.Rendering.LWRP
 
                 if (surfaceRequirements.requiresTime)
                 {
-                    surfaceDescriptionInputStruct.AppendLine("float {0};", ShaderGeneratorNames.Time);
-                    surfaceDescriptionInputStruct.AppendLine("float {0};", ShaderGeneratorNames.SinTime);
-                    surfaceDescriptionInputStruct.AppendLine("float {0};", ShaderGeneratorNames.CosTime);
+                    surfaceDescriptionInputStruct.AppendLine("float3 {0};", ShaderGeneratorNames.TimeParameters);
                 }
             }
 

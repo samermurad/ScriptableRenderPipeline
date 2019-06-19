@@ -10,9 +10,7 @@ namespace UnityEditor.ShaderGraph
         public const string ScreenPosition = "ScreenPosition";
         public const string VertexColor = "VertexColor";
         public const string FaceSign = "FaceSign";
-        public const string Time = "Time";
-        public const string SinTime = "SinTime";
-        public const string CosTime = "CosTime";
+        public const string TimeParameters = "TimeParameters";
 
         public static string GetUVName(this UVChannel channel)
         {

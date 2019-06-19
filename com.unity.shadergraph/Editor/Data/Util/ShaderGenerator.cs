@@ -690,9 +690,7 @@ namespace UnityEditor.ShaderGraph
 
             if (pixelRequirements.requiresTime)
             {
-                pixelShaderSurfaceInputs.AppendLine("surfaceInput.{0} = _Time.y;", ShaderGeneratorNames.Time);
-                pixelShaderSurfaceInputs.AppendLine("surfaceInput.{0} = _SinTime.w;", ShaderGeneratorNames.SinTime);
-                pixelShaderSurfaceInputs.AppendLine("surfaceInput.{0} = _CosTime.w;", ShaderGeneratorNames.CosTime);
+                pixelShaderSurfaceInputs.AppendLine("surfaceInput.{0} = _TimeParameters;", ShaderGeneratorNames.TimeParameters);
             }
 
             // ----------------------------------------------------- //
@@ -725,9 +723,7 @@ namespace UnityEditor.ShaderGraph
 
             if (vertexRequirements.requiresTime)
             {
-                vertexShaderDescriptionInputs.AppendLine("vdi.{0} = _Time.y;", ShaderGeneratorNames.Time);
-                vertexShaderDescriptionInputs.AppendLine("vdi.{0} = _SinTime.w;", ShaderGeneratorNames.SinTime);
-                vertexShaderDescriptionInputs.AppendLine("vdi.{0} = _CosTime.w;", ShaderGeneratorNames.CosTime);
+                vertexShaderDescriptionInputs.AppendLine("vdi.{0} = _TimeParameters;", ShaderGeneratorNames.TimeParameters);
             }
         }
 
