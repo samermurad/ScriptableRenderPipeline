@@ -270,8 +270,14 @@ float SampleShadow_MSM_1tap(float3 tcs, float lightLeakBias, float momentBias, f
 //
 //                  PCSS sampling
 //
-float SampleShadow_PCSS(float3 tcs, float2 posSS, float2 scale, float2 offset, float shadowSoftness, float minFilterRadius, int blockerSampleCount, int filterSampleCount, Texture2D tex, SamplerComparisonState compSamp, SamplerState samp)
+float SampleShadow_PCSS(float3 tcs, float2 posSS, float2 scale, float2 offset, float shadowSoftness, float minFilterRadius, int blockerSampleCount, int filterSampleCount, float depthBias, Texture2D tex, SamplerComparisonState compSamp, SamplerState samp)
 {
+
+#if SHADOW_USE_DEPTH_BIAS == 1
+    // add the depth bias
+    tcs.z += depthBias;
+#endif
+
     uint taaFrameIndex = _TaaFrameInfo.z;
     float sampleJitterAngle = InterleavedGradientNoise(posSS.xy, taaFrameIndex) * 2.0 * PI;
     float2 sampleJitter = float2(sin(sampleJitterAngle), cos(sampleJitterAngle));
