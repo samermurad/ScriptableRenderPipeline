@@ -477,7 +477,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                                 out shadowRequest.view, out invViewProjection, out shadowRequest.deviceProjectionYFlip,
                                 out shadowRequest.deviceProjection, out shadowRequest.splitData
                             );
-                            shadowRequest.constantBias = Math.Max(0.0003f, 10.0f * m_ShadowData.constantBias / (legacyLight.range * viewportSize.x));
+                            shadowRequest.constantBias = Math.Max(0.0003f, 20.0f * m_ShadowData.constantBias / (legacyLight.range * viewportSize.x));
                             break;
                         case LightType.Directional:
                             Vector4 cullingSphere;
@@ -527,7 +527,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             float f = legacyLight.range;
             float n = shadowNearPlane;
             shadowRequest.zBufferParam = new Vector4((f-n)/n, 1.0f, (f-n)/n*f, 1.0f/f);
-            shadowRequest.worldTexelSize = 2.0f / shadowRequest.deviceProjectionYFlip.m00 / viewportSize.x * 1.4142135623730950488016887242097f;
+            shadowRequest.worldTexelSize = 2.0f / shadowRequest.deviceProjectionYFlip.m00 / viewportSize.x * Mathf.Sqrt(2.0f);
             shadowRequest.normalBias = m_ShadowData.normalBias;
 
             // Make light position camera relative:

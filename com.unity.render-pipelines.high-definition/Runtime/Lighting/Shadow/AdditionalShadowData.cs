@@ -21,7 +21,7 @@ namespace UnityEngine.Experimental.Rendering
         public bool contactShadows = false;
         public Color shadowTint = Color.black;
         // bias control
-        public float normalBias = 0.5f;
+        public float normalBias = 0.75f;
 
         public float constantBias = 0.25f;
 
