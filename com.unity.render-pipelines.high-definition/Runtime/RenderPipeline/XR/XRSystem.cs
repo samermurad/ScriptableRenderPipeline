@@ -67,7 +67,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
             // Validate state
             Debug.Assert(framePasses.Count == 0, "XRSystem.ReleaseFrame() was not called!");
-            
+
             foreach (var camera in cameras)
             {
                 if (camera == null)
@@ -107,6 +107,9 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         internal void RenderMirrorView(CommandBuffer cmd)
         {
 #if USE_XR_SDK
+            if (display == null)
+                return;
+
             cmd.SetRenderTarget(new RenderTargetIdentifier(BuiltinRenderTextureType.CameraTarget));
             //cmd.SetViewport(hdCamera.camera.pixelRect);
 
