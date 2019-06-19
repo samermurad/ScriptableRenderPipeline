@@ -2,7 +2,7 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine.Experimental.Rendering.HDPipeline
 {
-    public class DefaultSettings
+    public static class DefaultSettings
     {
         static DefaultSettings()
         {
@@ -20,9 +20,11 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
         private static Volume s_DefaultVolume = null;
 
-        public const string defaultVolumeProfileFileStem = "DefaultSettingsVolumeProfile";
+        public static HDRenderPipelineAsset hdrpAssetWithDefaultSettings
+            => GraphicsSettings.renderPipelineAsset is HDRenderPipelineAsset hdrpAsset ? hdrpAsset : null;
 
-        public static VolumeProfile defaultVolumeProfile => Resources.Load<VolumeProfile>(defaultVolumeProfileFileStem);
+        public static VolumeProfile defaultVolumeProfile
+            => hdrpAssetWithDefaultSettings?.defaultVolumeProfile;
 
         public static Volume GetOrCreateDefaultVolume()
         {

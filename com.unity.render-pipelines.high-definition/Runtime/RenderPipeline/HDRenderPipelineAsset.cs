@@ -65,6 +65,14 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             set { m_RenderPipelineRayTracingResources = value; }
         }
 
+        [SerializeField] private VolumeProfile m_DefaultVolumeProfile;
+
+        public VolumeProfile defaultVolumeProfile
+        {
+            get => m_DefaultVolumeProfile;
+            set => m_DefaultVolumeProfile = value;
+        }
+
 #if UNITY_EDITOR
         HDRenderPipelineEditorResources m_RenderPipelineEditorResources;
 
