@@ -12,7 +12,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
 {
     [CustomEditor(typeof(DecalProjector))]
     [CanEditMultipleObjects]
-    public partial class DecalProjectorEditor : Editor
+    partial class DecalProjectorEditor : Editor
     {
         MaterialEditor m_MaterialEditor = null;
         SerializedProperty m_MaterialProperty;
