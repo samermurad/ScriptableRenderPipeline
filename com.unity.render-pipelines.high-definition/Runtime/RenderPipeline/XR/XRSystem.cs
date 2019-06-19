@@ -115,21 +115,34 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             {
                 cmd.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 
-                display.GetMirrorViewBlitDesc(null, out var blitDesc);
-                for (int i = 0; i < blitDesc.blitParamsCount; ++i)
+                if (display.GetMirrorViewBlitDesc(null, out var blitDesc))
                 {
-                    blitDesc.GetBlitParameter(i, out var blitParam);
+                    if (blitDesc.nativeBlitAvailable)
+                    {
+                        display.AddGraphicsThreadMirrorViewBlit(cmd, blitDesc.nativeBlitInvalidStates);
+                    }
+                    else
+                    {
+                        for (int i = 0; i < blitDesc.blitParamsCount; ++i)
+                        {
+                            blitDesc.GetBlitParameter(i, out var blitParam);
 
-                    Vector4 scaleBias = new Vector4(blitParam.srcRect.width, blitParam.srcRect.height, blitParam.srcRect.x, blitParam.srcRect.y);
-                    Vector4 scaleBiasRT = new Vector4(blitParam.destRect.width, blitParam.destRect.height, blitParam.destRect.x, blitParam.destRect.y);
+                            Vector4 scaleBias = new Vector4(blitParam.srcRect.width, blitParam.srcRect.height, blitParam.srcRect.x, blitParam.srcRect.y);
+                            Vector4 scaleBiasRT = new Vector4(blitParam.destRect.width, blitParam.destRect.height, blitParam.destRect.x, blitParam.destRect.y);
 
-                    mirrorViewMaterialProperty.SetTexture(HDShaderIDs._BlitTexture, blitParam.srcTex);
-                    mirrorViewMaterialProperty.SetVector(HDShaderIDs._BlitScaleBias, scaleBias);
-                    mirrorViewMaterialProperty.SetVector(HDShaderIDs._BlitScaleBiasRt, scaleBiasRT);
-                    mirrorViewMaterialProperty.SetInt(HDShaderIDs._BlitTexArraySlice, blitParam.srcTexArraySlice);
+                            mirrorViewMaterialProperty.SetTexture(HDShaderIDs._BlitTexture, blitParam.srcTex);
+                            mirrorViewMaterialProperty.SetVector(HDShaderIDs._BlitScaleBias, scaleBias);
+                            mirrorViewMaterialProperty.SetVector(HDShaderIDs._BlitScaleBiasRt, scaleBiasRT);
+                            mirrorViewMaterialProperty.SetInt(HDShaderIDs._BlitTexArraySlice, blitParam.srcTexArraySlice);
 
-                    int shaderPass = (blitParam.srcTex.dimension == TextureDimension.Tex2DArray) ? 1 : 0;
-                    cmd.DrawProcedural(Matrix4x4.identity, mirrorViewMaterial, shaderPass, MeshTopology.Triangles, 3, 1, mirrorViewMaterialProperty);
+                            int shaderPass = (blitParam.srcTex.dimension == TextureDimension.Tex2DArray) ? 1 : 0;
+                            cmd.DrawProcedural(Matrix4x4.identity, mirrorViewMaterial, shaderPass, MeshTopology.Triangles, 3, 1, mirrorViewMaterialProperty);
+                        }
+                    }
+                }
+                else
+                {
+                    cmd.ClearRenderTarget(true, true, Color.black);
                 }
             }
 #endif
