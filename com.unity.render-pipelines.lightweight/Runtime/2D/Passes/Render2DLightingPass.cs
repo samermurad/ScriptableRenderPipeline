@@ -59,7 +59,7 @@ namespace UnityEngine.Experimental.Rendering.LWRP
             context.ExecuteCommandBuffer(cmd);
 
             Profiler.BeginSample("RenderSpritesWithLighting - Prepare");
-            DrawingSettings combinedDrawSettings = CreateDrawingSettings(k_ShaderTags, ref renderingData, SortingCriteria.CommonTransparent); ;
+            DrawingSettings combinedDrawSettings = CreateDrawingSettings(k_ShaderTags, ref renderingData, SortingCriteria.CommonTransparent);
             DrawingSettings normalsDrawSettings = CreateDrawingSettings(k_NormalsRenderingPassName, ref renderingData, SortingCriteria.CommonTransparent);
 
             FilteringSettings filterSettings = new FilteringSettings();
