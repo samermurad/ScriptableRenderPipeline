@@ -78,7 +78,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                         ld.position = l.transform.position;
                         ld.range = l.range;
                         ld.coneAngle = l.spotAngle * Mathf.Deg2Rad; // coneAngle is the full angle
-                        ld.innerConeAngle = l.spotAngle * Mathf.Deg2Rad * add.GetInnerSpotPercent01();
+                        ld.innerConeAngle = l.spotAngle * Mathf.Deg2Rad * add.innerSpotPercent;
 #if UNITY_EDITOR
                         ld.shape0 = l.shadows != LightShadows.None ? l.shadowRadius : 0.0f;
 #else
@@ -86,7 +86,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 #endif
                         ld.shape1 = 0.0f;
                         ld.type = UnityEngine.Experimental.GlobalIllumination.LightType.Spot;
-                        ld.falloff = add.m_ApplyRangeAttenuation ? FalloffType.InverseSquared : FalloffType.InverseSquaredNoRangeAttenuation;
+                        ld.falloff = add.applyRangeAttenuation ? FalloffType.InverseSquared : FalloffType.InverseSquaredNoRangeAttenuation;
 
                         /*
                         switch (add.spotLightShape)
@@ -118,7 +118,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 #endif
                         ld.shape1 = 0.0f;
                         ld.type = UnityEngine.Experimental.GlobalIllumination.LightType.Point;
-                        ld.falloff = add.m_ApplyRangeAttenuation ? FalloffType.InverseSquared : FalloffType.InverseSquaredNoRangeAttenuation;
+                        ld.falloff = add.applyRangeAttenuation ? FalloffType.InverseSquared : FalloffType.InverseSquaredNoRangeAttenuation;
                         break;
 
                     // Note: We don't support this type in HDRP, but ini just in case
@@ -160,7 +160,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 #endif
                 // TEMP: for now, if we bake a rectangle type this will disable the light for runtime, need to speak with GI team about it!
                 ld.type = UnityEngine.Experimental.GlobalIllumination.LightType.Rectangle;
-                ld.falloff = add.m_ApplyRangeAttenuation ? FalloffType.InverseSquared : FalloffType.InverseSquaredNoRangeAttenuation;
+                ld.falloff = add.applyRangeAttenuation ? FalloffType.InverseSquared : FalloffType.InverseSquaredNoRangeAttenuation;
             }
             else if (add.lightTypeExtent == LightTypeExtent.Tube)
             {

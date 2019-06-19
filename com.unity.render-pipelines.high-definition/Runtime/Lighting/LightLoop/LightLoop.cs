@@ -950,7 +950,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             if (m_lightList.directionalLights.Count >= m_MaxDirectionalLightsOnScreen)
                 return false;
 
-            bool contributesToLighting = ((additionalLightData.lightDimmer > 0) && (additionalLightData.affectDiffuse || additionalLightData.m_AffectSpecular)) || (additionalLightData.volumetricDimmer > 0);
+            bool contributesToLighting = ((additionalLightData.lightDimmer > 0) && (additionalLightData.affectDiffuse || additionalLightData.affectSpecular)) || (additionalLightData.volumetricDimmer > 0);
 
             if (!contributesToLighting)
                 return false;
@@ -967,7 +967,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             lightData.forward = light.GetForward();
             // Rescale for cookies and windowing.
             lightData.right      = light.GetRight() * 2 / Mathf.Max(additionalLightData.shapeWidth, 0.001f);
-            lightData.up         = light.GetUp() * 2 / Mathf.Max(additionalLightData.m_ShapeHeight, 0.001f);
+            lightData.up         = light.GetUp() * 2 / Mathf.Max(additionalLightData.shapeHeight, 0.001f);
             lightData.positionRWS = light.GetPosition();
             lightData.color = GetLightColor(light);
 
@@ -977,7 +977,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
             lightData.lightDimmer           = additionalLightData.lightDimmer;
             lightData.diffuseDimmer         = additionalLightData.affectDiffuse  ? additionalLightData.lightDimmer : 0;
-            lightData.specularDimmer        = additionalLightData.m_AffectSpecular ? additionalLightData.lightDimmer * hdCamera.frameSettings.specularGlobalDimmer : 0;
+            lightData.specularDimmer        = additionalLightData.affectSpecular ? additionalLightData.lightDimmer * hdCamera.frameSettings.specularGlobalDimmer : 0;
             lightData.volumetricLightDimmer = additionalLightData.volumetricDimmer;
 
             lightData.shadowIndex = lightData.cookieIndex = -1;
@@ -1022,7 +1022,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             }
 
             // Value of max smoothness is from artists point of view, need to convert from perceptual smoothness to roughness
-            lightData.minRoughness = Mathf.Max((1.0f - additionalLightData.m_MaxSmoothness) * (1.0f - additionalLightData.m_MaxSmoothness));
+            lightData.minRoughness = Mathf.Max((1.0f - additionalLightData.maxSmoothness) * (1.0f - additionalLightData.maxSmoothness));
 
             lightData.shadowMaskSelector = Vector4.zero;
 
@@ -1059,9 +1059,9 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
             // Both of these positions are non-camera-relative.
             float distanceToCamera  = (light.GetPosition() - hdCamera.camera.transform.position).magnitude;
-            float lightDistanceFade = HDUtils.ComputeLinearDistanceFade(distanceToCamera, additionalLightData.m_FadeDistance);
+            float lightDistanceFade = HDUtils.ComputeLinearDistanceFade(distanceToCamera, additionalLightData.fadeDistance);
 
-            bool contributesToLighting = ((additionalLightData.lightDimmer > 0) && (additionalLightData.affectDiffuse || additionalLightData.m_AffectSpecular)) || (additionalLightData.volumetricDimmer > 0);
+            bool contributesToLighting = ((additionalLightData.lightDimmer > 0) && (additionalLightData.affectDiffuse || additionalLightData.affectSpecular)) || (additionalLightData.volumetricDimmer > 0);
                  contributesToLighting = contributesToLighting && (lightDistanceFade > 0);
 
             if (!contributesToLighting)
@@ -1075,7 +1075,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
             lightData.positionRWS = light.GetPosition();
 
-            bool applyRangeAttenuation = additionalLightData.m_ApplyRangeAttenuation && (gpuLightType != GPULightType.ProjectorBox);
+            bool applyRangeAttenuation = additionalLightData.applyRangeAttenuation && (gpuLightType != GPULightType.ProjectorBox);
 
             // Discard light if disabled in debug display settings
             if (lightData.lightType.IsAreaLight())
@@ -1128,14 +1128,14 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             lightData.right = light.GetRight();
 
             lightDimensions.x = additionalLightData.shapeWidth;
-            lightDimensions.y = additionalLightData.m_ShapeHeight;
+            lightDimensions.y = additionalLightData.shapeHeight;
             lightDimensions.z = light.range;
 
             if (lightData.lightType == GPULightType.ProjectorBox)
             {
                 // Rescale for cookies and windowing.
                 lightData.right *= 2.0f / Mathf.Max(additionalLightData.shapeWidth, 0.001f);
-                lightData.up    *= 2.0f / Mathf.Max(additionalLightData.m_ShapeHeight, 0.001f);
+                lightData.up    *= 2.0f / Mathf.Max(additionalLightData.shapeHeight, 0.001f);
             }
             else if (lightData.lightType == GPULightType.ProjectorPyramid)
             {
@@ -1168,7 +1168,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             {
                 var spotAngle = light.spotAngle;
 
-                var innerConePercent = additionalLightData.GetInnerSpotPercent01();
+                var innerConePercent = additionalLightData.innerSpotPercent;
                 var cosSpotOuterHalfAngle = Mathf.Clamp(Mathf.Cos(spotAngle * 0.5f * Mathf.Deg2Rad), 0.0f, 1.0f);
                 var sinSpotOuterHalfAngle = Mathf.Sqrt(1.0f - cosSpotOuterHalfAngle * cosSpotOuterHalfAngle);
                 var cosSpotInnerHalfAngle = Mathf.Clamp(Mathf.Cos(spotAngle * 0.5f * innerConePercent * Mathf.Deg2Rad), 0.0f, 1.0f); // inner cone
@@ -1197,12 +1197,12 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
             if (lightData.lightType == GPULightType.Rectangle || lightData.lightType == GPULightType.Tube)
             {
-                lightData.size = new Vector2(additionalLightData.shapeWidth, additionalLightData.m_ShapeHeight);
+                lightData.size = new Vector2(additionalLightData.shapeWidth, additionalLightData.shapeHeight);
             }
 
             lightData.lightDimmer           = lightDistanceFade * (additionalLightData.lightDimmer);
             lightData.diffuseDimmer         = lightDistanceFade * (additionalLightData.affectDiffuse  ? additionalLightData.lightDimmer : 0);
-            lightData.specularDimmer        = lightDistanceFade * (additionalLightData.m_AffectSpecular ? additionalLightData.lightDimmer * hdCamera.frameSettings.specularGlobalDimmer : 0);
+            lightData.specularDimmer        = lightDistanceFade * (additionalLightData.affectSpecular ? additionalLightData.lightDimmer * hdCamera.frameSettings.specularGlobalDimmer : 0);
             lightData.volumetricLightDimmer = lightDistanceFade * (additionalLightData.volumetricDimmer);
 
             lightData.cookieIndex = -1;
@@ -1269,7 +1269,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             lightData.shadowIndex = shadowIndex;
 #endif
             // Value of max smoothness is from artists point of view, need to convert from perceptual smoothness to roughness
-            lightData.minRoughness = (1.0f - additionalLightData.m_MaxSmoothness) * (1.0f - additionalLightData.m_MaxSmoothness);
+            lightData.minRoughness = (1.0f - additionalLightData.maxSmoothness) * (1.0f - additionalLightData.maxSmoothness);
 
             lightData.shadowMaskSelector = Vector4.zero;
 

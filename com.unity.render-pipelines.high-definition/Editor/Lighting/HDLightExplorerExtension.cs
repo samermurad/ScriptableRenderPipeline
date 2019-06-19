@@ -284,12 +284,12 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                         EditorGUI.LabelField(r,"null");
                         return;
                     }
-                    bool affectSpecular = lightDataPairing[light].hdAdditionalLightData.m_AffectSpecular;
+                    bool affectSpecular = lightDataPairing[light].hdAdditionalLightData.affectSpecular;
                     EditorGUI.BeginChangeCheck();
                     affectSpecular = EditorGUI.Toggle(r, affectSpecular);
                     if (EditorGUI.EndChangeCheck())
                     {
-                        lightDataPairing[light].hdAdditionalLightData.m_AffectSpecular = affectSpecular;
+                        lightDataPairing[light].hdAdditionalLightData.affectSpecular = affectSpecular;
                     }
                 }),
                 new LightingExplorerTableColumn(LightingExplorerTableColumn.DataType.Float, HDStyles.FadeDistance, "m_Intensity", 60, (r, prop, dep) =>                // 16: Fade Distance
@@ -300,13 +300,13 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                         EditorGUI.LabelField(r,"null");
                         return;
                     }
-                    float fadeDistance = lightDataPairing[light].hdAdditionalLightData.m_FadeDistance;
+                    float fadeDistance = lightDataPairing[light].hdAdditionalLightData.fadeDistance;
                     EditorGUI.BeginChangeCheck();
                     fadeDistance = EditorGUI.FloatField(r, fadeDistance);
                     if (EditorGUI.EndChangeCheck())
                     {
                         Undo.RecordObject(lightDataPairing[light].hdAdditionalLightData, "Changed light fade distance");
-                        lightDataPairing[light].hdAdditionalLightData.m_FadeDistance = fadeDistance;
+                        lightDataPairing[light].hdAdditionalLightData.fadeDistance = fadeDistance;
                     }
                 }),
                 new LightingExplorerTableColumn(LightingExplorerTableColumn.DataType.Float, HDStyles.ShadowFadeDistance, "m_Intensity", 60, (r, prop, dep) =>           // 17: Shadow Fade Distance

@@ -66,7 +66,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
     // into the engine when we can see them being generally useful
     [RequireComponent(typeof(Light))]
     [ExecuteAlways]
-    public partial class HDAdditionalLightData : MonoBehaviour, ISerializationCallbackReceiver
+    public partial class HDAdditionalLightData : MonoBehaviour
     {
         public const float k_DefaultDirectionalLightIntensity = Mathf.PI; // In lux
         public const float k_DefaultPunctualLightIntensity = 600.0f;      // Light default to 600 lumen, i.e ~48 candela
@@ -112,7 +112,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                     return;
 
                 m_Intensity = Mathf.Clamp(value, 0, float.MaxValue);
-                SynchronizeLightValues()
+                SynchronizeLightValues();
             }
         }
 
@@ -130,7 +130,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                 m_EnableSpotReflector = value;
                 SynchronizeLightValues();
             }
-        };
+        }
 
         // Lux unity for all light except directional require a distance
         [SerializeField, FormerlySerializedAs("luxAtDistance")]
@@ -391,7 +391,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         // If true, we apply the smooth attenuation factor on the range attenuation to get 0 value, else the attenuation is just inverse square and never reach 0
         [SerializeField, FormerlySerializedAs("applyRangeAttenuation")]
         bool m_ApplyRangeAttenuation = true;
-        public float applyRangeAttenuation
+        public bool applyRangeAttenuation
         {
             get => m_ApplyRangeAttenuation;
             set
@@ -720,32 +720,68 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
         [Range(0, 0.001f)]
         [SerializeField, FormerlySerializedAs("minFilterSize")]
-        public float m_MinFilterSize = 0.00001f;
-        public int minFilterSize
+        float m_MinFilterSize = 0.00001f;
+        public float minFilterSize
         {
-            get => m_FilterSampleCount;
+            get => m_MinFilterSize;
             set
             {
-                if (m_FilterSampleCount == value)
+                if (m_MinFilterSize == value)
                     return;
                 
-                m_FilterSampleCount = Mathf.Clamp(value, 0.0f, 0.001f);
+                m_MinFilterSize = Mathf.Clamp(value, 0.0f, 0.001f);
             }
         }
 
         // Improved Moment Shadows settings
         [Range(1, 32)]
         [SerializeField, FormerlySerializedAs("kernelSize")]
-        public int kernelSize = 5;
+        int m_KernelSize = 5;
+        public int kernelSize
+        {
+            get => m_KernelSize;
+            set
+            {
+                if (m_KernelSize == value)
+                    return;
+                
+                m_KernelSize = Mathf.Clamp(value, 1, 32);
+            }
+        }
+
         [Range(0.0f, 9.0f)]
         [SerializeField, FormerlySerializedAs("lightAngle")]
-        public float lightAngle = 1.0f;
+        float m_LightAngle = 1.0f;
+        public float lightAngle
+        {
+            get => m_LightAngle;
+            set
+            {
+                if (m_LightAngle == value)
+                    return;
+                
+                m_LightAngle = Mathf.Clamp(value, 0.0f, 9.0f);
+            }
+        }
+
         [Range(0.0001f, 0.01f)]
         [SerializeField, FormerlySerializedAs("maxDepthBias")]
-        public float maxDepthBias = 0.001f;
+        float m_MaxDepthBias = 0.001f;
+        public float maxDepthBias
+        {
+            get => m_MaxDepthBias;
+            set
+            {
+                if (m_MaxDepthBias == value)
+                    return;
+                
+                m_MaxDepthBias = Mathf.Clamp(value, 0.0001f, 0.01f);
+            }
+        }
 
 #endregion
 
+#pragma warning disable 0414 // The field '...' is assigned but its value is never used, these fields are used by the inspector
         // This is specific for the LightEditor GUI and not use at runtime
         [SerializeField, FormerlySerializedAs("useOldInspector")]
         bool useOldInspector = false;
@@ -755,6 +791,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         bool featuresFoldout = true;
         [SerializeField, FormerlySerializedAs("showAdditionalSettings")]
         byte showAdditionalSettings = 0;
+#pragma warning restore 0414
 
         HDShadowRequest[]   shadowRequests;
         bool                m_WillRenderShadowMap;
@@ -798,6 +835,18 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                 if (_ShadowData == null)
                     _ShadowData = GetComponent<AdditionalShadowData>();
                 return _ShadowData;
+            }
+        }
+
+        // Runtime datas used to compute light intensity
+        Light m_light;
+        internal Light legacyLight
+        {
+            get
+            {
+                if (m_light == null)
+                    m_light = GetComponent<Light>();
+                return m_light;
             }
         }
 
@@ -1166,18 +1215,6 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         [System.NonSerialized]
         bool needsIntensityUpdate_1_0 = false;
 
-        // Runtime datas used to compute light intensity
-        Light m_light;
-        internal Light legacyLight
-        {
-            get
-            {
-                if (m_light == null)
-                    m_light = GetComponent<Light>();
-                return m_light;
-            }
-        }
-
         void SynchronizeLightIntensity(float intensity)
         {
             m_Intensity = intensity;
@@ -1295,6 +1332,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
 #endif
 
+        // TODO: we might be able to get rid to that
         [System.NonSerialized]
         bool m_Animated;
 
@@ -1483,7 +1521,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             data.useOldInspector = useOldInspector;
             data.featuresFoldout = featuresFoldout;
             data.showAdditionalSettings = showAdditionalSettings;
-            data.displayLightIntensity = m_Intensity;
+            data.m_Intensity = m_Intensity;
             data.displayAreaLightEmissiveMesh = displayAreaLightEmissiveMesh;
             data.needsIntensityUpdate_1_0 = needsIntensityUpdate_1_0;
             data.interactsWithSky = interactsWithSky;
@@ -1601,11 +1639,6 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             UpdateBounds();
         }
 
-        void OnBeforeSerialize()
-        {
-            UpdateBounds();
-        }
-
 #region Synchronization functions to patch values in the Light component when we change properties inside HDAdditionalLightData
 
         public void SynchronizeLightValues()
@@ -1615,6 +1648,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             
             // Patch bounds
             UpdateBounds();
+
+            UpdateAreaLightEmissiveMesh();
             // TODO: synch emissive quad
         }
 
