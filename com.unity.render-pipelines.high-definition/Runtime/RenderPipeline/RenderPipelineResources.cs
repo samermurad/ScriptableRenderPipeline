@@ -86,6 +86,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             public Shader copyDepthBufferPS;
             [Reload("Runtime/ShaderLibrary/Blit.shader")]
             public Shader blitPS;
+            [Reload("Runtime/ShaderLibrary/XRMirrorView.shader")]
+            public Shader xrMirrorViewPS;
 
             [Reload("Runtime/ShaderLibrary/DownsampleDepth.shader")]
             public Shader downsampleDepthPS;

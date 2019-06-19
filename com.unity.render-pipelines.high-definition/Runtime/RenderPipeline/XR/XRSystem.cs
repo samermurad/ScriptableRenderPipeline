@@ -23,15 +23,21 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         // Store active passes and avoid allocating memory every frames
         List<(Camera, XRPass)> framePasses = new List<(Camera, XRPass)>();
 
+        // Blit shader for the mirror view
+        Material mirrorViewMaterial;
+        MaterialPropertyBlock mirrorViewMaterialProperty = new MaterialPropertyBlock();
+
 #if USE_XR_SDK
         List<XRDisplaySubsystem> displayList = new List<XRDisplaySubsystem>();
         XRDisplaySubsystem display = null;
 #endif
 
-        internal XRSystem()
+        internal XRSystem(Shader xrMirrorViewPS)
         {
             RefreshXrSdk();
+
             TextureXR.maxViews = GetMaxViews();
+            mirrorViewMaterial = CoreUtils.CreateEngineMaterial(xrMirrorViewPS);
         }
 
         // Compute the maximum number of views (slices) to allocate for texture arrays
@@ -96,6 +102,33 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             }
 
             return framePasses;
+        }
+
+        internal void RenderMirrorView(CommandBuffer cmd)
+        {
+#if USE_XR_SDK
+            cmd.SetRenderTarget(new RenderTargetIdentifier(BuiltinRenderTextureType.CameraTarget));
+            //cmd.SetViewport(hdCamera.camera.pixelRect);
+
+            display.GetMirrorViewBlitDesc(RenderTexture.active, out var blitDesc);
+            for (int i = 0; i < blitDesc.blitParamsCount; ++i)
+            {
+                blitDesc.GetBlitParameter(i, out var blitParam);
+
+                //cmd.SetViewport(blitParameter.destRect);
+
+                Vector4 scaleBias = new Vector4(blitParam.srcRect.width, blitParam.srcRect.height, blitParam.srcRect.x, blitParam.srcRect.y);
+                Vector4 scaleBiasRT = new Vector4(blitParam.destRect.width, blitParam.destRect.height, blitParam.destRect.x, blitParam.destRect.y);
+
+                mirrorViewMaterialProperty.SetTexture(HDShaderIDs._BlitTexture, blitParam.srcTex);
+                mirrorViewMaterialProperty.SetVector(HDShaderIDs._BlitScaleBias, scaleBias);
+                mirrorViewMaterialProperty.SetVector(HDShaderIDs._BlitScaleBiasRt, scaleBiasRT);
+                mirrorViewMaterialProperty.SetInt(HDShaderIDs._BlitTexArraySlice, blitParam.srcTexArraySlice);
+
+                int shaderPass = (blitParam.srcTex.dimension == TextureDimension.Tex2DArray) ? 1 : 0;
+                cmd.DrawProcedural(Matrix4x4.identity, mirrorViewMaterial, shaderPass, MeshTopology.Triangles, 3, 1, mirrorViewMaterialProperty);
+            }
+#endif
         }
 
         bool RefreshXrSdk()

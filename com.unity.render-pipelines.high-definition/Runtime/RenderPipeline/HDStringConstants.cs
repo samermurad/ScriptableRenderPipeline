@@ -396,6 +396,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         public static readonly int _BlitTexture = Shader.PropertyToID("_BlitTexture");
         public static readonly int _BlitScaleBias = Shader.PropertyToID("_BlitScaleBias");
         public static readonly int _BlitMipLevel = Shader.PropertyToID("_BlitMipLevel");
+        public static readonly int _BlitTexArraySlice = Shader.PropertyToID("_BlitTexArraySlice");
         public static readonly int _BlitScaleBiasRt = Shader.PropertyToID("_BlitScaleBiasRt");
 
         public static readonly int _WorldScales = Shader.PropertyToID("_WorldScales");

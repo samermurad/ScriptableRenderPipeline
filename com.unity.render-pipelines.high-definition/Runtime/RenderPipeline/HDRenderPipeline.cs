@@ -26,7 +26,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         readonly DBufferManager m_DbufferManager;
         readonly SharedRTManager m_SharedRTManager = new SharedRTManager();
         readonly PostProcessSystem m_PostProcessSystem;
-        readonly XRSystem m_XRSystem = new XRSystem();
+        readonly XRSystem m_XRSystem;
 
         public bool frameSettingsHistoryEnabled = false;
 
@@ -246,6 +246,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             // TODO: Might want to initialize to at least the window resolution to avoid un-necessary re-alloc in the player
             RTHandles.Initialize(1, 1, m_Asset.currentPlatformRenderPipelineSettings.supportMSAA, m_Asset.currentPlatformRenderPipelineSettings.msaaSampleCount);
 
+            m_XRSystem = new XRSystem(asset.renderPipelineResources.shaders.xrMirrorViewPS);
             m_GPUCopy = new GPUCopy(asset.renderPipelineResources.shaders.copyChannelCS);
 
             m_MipGenerator = new MipGenerator(m_Asset);
@@ -1074,9 +1075,9 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                     // Select render target
                     RenderTargetIdentifier targetId = camera.targetTexture ?? new RenderTargetIdentifier(BuiltinRenderTextureType.CameraTarget);
 
-                    // XRTODO(2019.3) : remove once XRE-445 is done, use hdCamera.xr.renderTarget directly
-                    if (hdCamera.xr.enabled && hdCamera.xr.tempRenderTexture != null)
-                        targetId = hdCamera.xr.tempRenderTexture;
+                    // Render directly to XR render target if active
+                    if (hdCamera.xr.enabled)
+                        targetId = hdCamera.xr.renderTarget;
 
                     // Add render request
                     var request = new RenderRequest
@@ -1463,6 +1464,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                             GenericPool<HDCullingResults>.Release(renderRequest.cullingResults);
                         }
 
+                        m_XRSystem.RenderMirrorView(cmd);
                         renderContext.ExecuteCommandBuffer(cmd);
 
                         CommandBufferPool.Release(cmd);
