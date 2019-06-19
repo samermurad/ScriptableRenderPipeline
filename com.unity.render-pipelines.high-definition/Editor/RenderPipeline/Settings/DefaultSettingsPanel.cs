@@ -1,8 +1,5 @@
 using System;
-using UnityEditor.Build;
-using UnityEditor.Build.Reporting;
 using UnityEditor.Rendering;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering.HDPipeline;
 using UnityEngine.Rendering;
@@ -40,22 +37,57 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 {
                     var title = new Label
                     {
+                        text = "General Settings"
+                    };
+                    title.AddToClassList("h1");
+                    Add(title);
+                }
+                {
+                    var generalSettingsInspector = new IMGUIContainer(Draw_GeneralSettings);
+                    generalSettingsInspector.style.marginLeft = 5;
+                    Add(generalSettingsInspector);
+                }
+                {
+                    var space = new VisualElement();
+                    space.style.height = 10;
+                    Add(space);
+                }
+                {
+                    var title = new Label
+                    {
+                        text = "Frame Settings"
+                    };
+                    title.AddToClassList("h1");
+                    Add(title);
+                }
+                {
+                    var generalSettingsInspector = new IMGUIContainer(Draw_DefaultFrameSettings);
+                    generalSettingsInspector.style.marginLeft = 5;
+                    Add(generalSettingsInspector);
+                }
+                {
+                    var space = new VisualElement();
+                    space.style.height = 10;
+                    Add(space);
+                }
+                {
+                    var title = new Label
+                    {
                         text = "Volume Components"
                     };
                     title.AddToClassList("h1");
                     Add(title);
                 }
                 {
-                    var inspectorContainer = new IMGUIContainer(Draw_VolumeInspector);
-                    inspectorContainer.style.flexGrow = 1;
-                    inspectorContainer.style.flexDirection = FlexDirection.Row;
-                    Add(inspectorContainer);
+                    var volumeInspector = new IMGUIContainer(Draw_VolumeInspector);
+                    volumeInspector.style.flexGrow = 1;
+                    volumeInspector.style.flexDirection = FlexDirection.Row;
+                    Add(volumeInspector);
                 }
             }
 
-            private static GUIContent k_DefaultVolumeProfileLabel = new GUIContent("Default Volume Profile Asset");
             private static GUIContent k_DefaultHDRPAsset = new GUIContent("Asset with the default settings");
-            void Draw_VolumeInspector()
+            void Draw_GeneralSettings()
             {
                 var hdrpAsset = DefaultSettings.hdrpAssetWithDefaultSettings;
                 if (hdrpAsset == null)
@@ -67,6 +99,19 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 GUI.enabled = false;
                 EditorGUILayout.ObjectField(k_DefaultHDRPAsset, hdrpAsset, typeof(HDRenderPipelineAsset), false);
                 GUI.enabled = true;
+
+                var serializedObject = new SerializedObject(hdrpAsset);
+                var serializedHDRPAsset = new SerializedHDRenderPipelineAsset(serializedObject);
+
+                HDRenderPipelineUI.GeneralSection.Draw(serializedHDRPAsset, null);
+            }
+
+            private static GUIContent k_DefaultVolumeProfileLabel = new GUIContent("Default Volume Profile Asset");
+            void Draw_VolumeInspector()
+            {
+                var hdrpAsset = DefaultSettings.hdrpAssetWithDefaultSettings;
+                if (hdrpAsset == null)
+                    return;
 
                 var asset = EditorDefaultSettings.GetOrAssignDefaultVolumeProfile();
 
@@ -80,6 +125,18 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 Editor.CreateCachedEditor(asset,
                     Type.GetType("UnityEditor.Rendering.VolumeProfileEditor"), ref m_Cached);
                 m_Cached.OnInspectorGUI();
+            }
+
+            void Draw_DefaultFrameSettings()
+            {
+                var hdrpAsset = DefaultSettings.hdrpAssetWithDefaultSettings;
+                if (hdrpAsset == null)
+                    return;
+
+                var serializedObject = new SerializedObject(hdrpAsset);
+                var serializedHDRPAsset = new SerializedHDRenderPipelineAsset(serializedObject);
+
+                HDRenderPipelineUI.FrameSettingsSection.Draw(serializedHDRPAsset, null);
             }
         }
     }
