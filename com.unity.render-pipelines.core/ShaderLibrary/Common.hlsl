@@ -1006,7 +1006,7 @@ real SafeDiv(real numer, real denom)
 // Assumes that (0 <= x <= Pi).
 real SinFromCos(real cosX)
 {
-    return sqrt(saturate((real)(1) - cosX * cosX));
+    return sqrt(saturate(1 - cosX * cosX));
 }
 
 // Dot product in spherical coordinates.
