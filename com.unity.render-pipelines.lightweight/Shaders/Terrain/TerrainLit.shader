@@ -13,7 +13,7 @@
 
 	HLSLINCLUDE
 	
-	#pragma multi_compile_local __ _ALPHATEST_ON
+	#pragma multi_compile __ _ALPHATEST_ON
 	
 	ENDHLSL
 	
