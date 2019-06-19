@@ -125,10 +125,10 @@ float EvalShadow_WorldTexelSize(float worldTexelSize, float L_dist, bool perspPr
 }
 
 // receiver bias either using the normal to weight normal and view biases, or just light view biasing
-float3 EvalShadow_ReceiverBias(float worldTexelSize, float normalBias, float3 positionWS, float3 normalWS, float3 L, float L_dist, bool perspProj)
+float3 EvalShadow_NormalBias(float worldTexelSize, float normalBias, float3 normalWS)
 {
-    float3 normal_bias = normalWS * normalBias;
-    return positionWS + (normal_bias) * EvalShadow_WorldTexelSize(worldTexelSize, L_dist, perspProj);
+    float normalBiasMult = normalBias * worldTexelSize;
+    return normalWS * normalBiasMult;
 }
 
 //
@@ -137,7 +137,9 @@ float3 EvalShadow_ReceiverBias(float worldTexelSize, float normalBias, float3 po
 float EvalShadow_PunctualDepth(HDShadowData sd, Texture2D tex, SamplerComparisonState samp, float2 positionSS, float3 positionWS, float3 normalWS, float3 L, float L_dist, bool perspective)
 {
     /* bias the world position */
-    positionWS = EvalShadow_ReceiverBias(sd.worldTexelSize, sd.normalBias, positionWS, normalWS, L, L_dist, perspective);
+    float worldTexelSize = EvalShadow_WorldTexelSize(sd.worldTexelSize, L_dist, true);
+    float3 normalBias = EvalShadow_NormalBias(worldTexelSize, sd.normalBias, normalWS);
+    positionWS += normalBias;
     /* get shadowmap texcoords */
     float3 posTC = EvalShadow_GetTexcoordsAtlas(sd, _ShadowAtlasSize.zw, positionWS, perspective);
     /* sample the texture */
@@ -237,8 +239,9 @@ float EvalShadow_CascadedDepth_Blend(HDShadowContext shadowContext, Texture2D te
     
         /* normal based bias */
         float3 orig_pos = positionWS;
-        positionWS = EvalShadow_ReceiverBias(sd.worldTexelSize, sd.normalBias, positionWS, normalWS, L, 1.0, false);
-    
+        float3 normalBias = EvalShadow_NormalBias(sd.worldTexelSize, sd.normalBias, normalWS);
+        positionWS += normalBias;
+
         /* get shadowmap texcoords */
         float3 posTC = EvalShadow_GetTexcoordsAtlas(sd, _CascadeShadowAtlasSize.zw, positionWS, false);
         /* evalute the first cascade */
@@ -262,6 +265,44 @@ float EvalShadow_CascadedDepth_Blend(HDShadowContext shadowContext, Texture2D te
             }
         }
         shadow = lerp(shadow, shadow1, alpha);
+    }
+
+    return shadow;
+}
+
+
+float EvalShadow_CascadedDepth_Dither(HDShadowContext shadowContext, Texture2D tex, SamplerComparisonState samp, float2 positionSS, float3 positionWS, float3 normalWS, int index, float3 L)
+{
+    float   alpha;
+    int     cascadeCount;
+    float   shadow = 1.0;
+    int     shadowSplitIndex = EvalShadow_GetSplitIndex(shadowContext, index, positionWS, alpha, cascadeCount);
+
+    if (shadowSplitIndex >= 0.0)
+    {
+        HDShadowData sd = shadowContext.shadowDatas[index];
+        LoadDirectionalShadowDatas(sd, shadowContext, index + shadowSplitIndex);
+
+        /* normal based bias */
+        float worldTexelSize = sd.worldTexelSize;
+        float3 normalBias = EvalShadow_NormalBias(worldTexelSize, sd.normalBias, normalWS);
+
+        /* We select what split we need to sample from */
+        float nextSplit = min(shadowSplitIndex + 1, cascadeCount - 1);
+        bool evalNextCascade = nextSplit != shadowSplitIndex && step(InterleavedGradientNoise(positionSS.xy, _TaaFrameInfo.z), alpha);
+
+        if (evalNextCascade)
+        {
+            LoadDirectionalShadowDatas(sd, shadowContext, index + nextSplit);
+            float biasModifier = (sd.worldTexelSize / worldTexelSize);
+            normalBias *= biasModifier;
+        }
+
+        positionWS += normalBias;
+        float3 posTC = EvalShadow_GetTexcoordsAtlas(sd, _CascadeShadowAtlasSize.zw, positionWS, false);
+
+        shadow = DIRECTIONAL_FILTER_ALGORITHM(sd, positionSS, posTC, tex, samp, sd.constantBias);
+        shadow = (shadowSplitIndex < cascadeCount - 1) ? shadow : lerp(shadow, 1.0, alpha);
     }
 
     return shadow;
