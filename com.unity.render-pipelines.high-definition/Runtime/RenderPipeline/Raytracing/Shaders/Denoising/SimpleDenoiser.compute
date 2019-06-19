@@ -109,7 +109,11 @@ void TEMPORAL_ACCUMULATION_SINGLE(uint2 groupThreadId : SV_GroupThreadID, uint2 
     color = UnmapPerChannel(lerp(color, history, feedback));
     color = clamp(color, 0.0, CLAMP_MAX);
     
+#if SINGLE_CHANNEL
+    _DenoiseOutputTextureRW[COORD_TEXTURE2D_X(centerCoord)] = color.x;
+#else
     _DenoiseOutputTextureRW[COORD_TEXTURE2D_X(centerCoord)] = color;
+#endif
 }
 
 [numthreads(SPATIO_TEMPORAL_TILE_SIZE, SPATIO_TEMPORAL_TILE_SIZE, 1)]
@@ -166,7 +170,13 @@ void TEMPORAL_ACCUMULATION_COLOR(uint2 groupThreadId : SV_GroupThreadID, uint2 g
     color = Unmap(lerp(color, history, feedback));
     color = clamp(color, 0.0, CLAMP_MAX);
 
-    _DenoiseOutputTextureRW[COORD_TEXTURE2D_X(centerCoord)] = float4(color, LOAD_TEXTURE2D_X(_DenoiseInputTexture, centerCoord).w);
+    float4 denoiseOutput = float4(color, LOAD_TEXTURE2D_X(_DenoiseInputTexture, centerCoord).w);
+
+#if SINGLE_CHANNEL
+    _DenoiseOutputTextureRW[COORD_TEXTURE2D_X(centerCoord)] = denoiseOutput.x;
+#else
+    _DenoiseOutputTextureRW[COORD_TEXTURE2D_X(centerCoord)] = denoiseOutput;
+#endif
 }
 
 [numthreads(SPATIO_TEMPORAL_TILE_SIZE, SPATIO_TEMPORAL_TILE_SIZE, 1)]
@@ -184,7 +194,7 @@ void COPY_HISTORY(uint3 dispatchThreadId : SV_DispatchThreadID)
         _DenoiseOutputTextureRW[uint3(dispatchThreadId.xy, _HistorySlot)] = _DenoiseInputTexture[COORD_TEXTURE2D_X(dispatchThreadId.xy)];
         #endif
     #else
-        _DenoiseOutputTextureRW[COORD_TEXTURE2D_X(dispatchThreadId.xy)] = _DenoiseInputTexture[COORD_TEXTURE2D_X(dispatchThreadId.xy)];
+        _DenoiseOutputTextureRW[COORD_TEXTURE2D_X(dispatchThreadId.xy)] = _DenoiseInputTexture[COORD_TEXTURE2D_X(dispatchThreadId.xy)].x;
     #endif
 }
 
