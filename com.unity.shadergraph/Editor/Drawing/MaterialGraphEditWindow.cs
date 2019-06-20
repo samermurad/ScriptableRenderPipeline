@@ -319,6 +319,22 @@ namespace UnityEditor.ShaderGraph.Drawing
                 subGraph.AddNode(node);
             }
 
+            foreach (var note in deserialized.stickyNotes)
+            {
+                if (!groupGuids.Contains(note.groupGuid))
+                {
+                    groupGuids.Add(note.groupGuid);
+                }
+
+                if (note.groupGuid != Guid.Empty)
+                {
+                    note.groupGuid = !groupGuidMap.ContainsKey(note.groupGuid) ? Guid.Empty : groupGuidMap[note.groupGuid];
+                }
+
+                note.RewriteGuid();
+                subGraph.AddStickyNote(note);
+            }
+
             // figure out what needs remapping
             var externalOutputSlots = new List<IEdge>();
             var externalInputSlots = new List<IEdge>();
@@ -497,7 +513,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                 graphView.selection.OfType<IShaderNodeView>().Select(x => x.node).Where(x => x.allowedInSubGraph).ToArray(),
                 new IEdge[] {},
                 new GroupData[] {},
-                new StickyNoteData[] {});
+                graphView.selection.OfType<StickyNote>().Select(x => x.userData).ToArray());
             graphObject.graph.ValidateGraph();
         }
 

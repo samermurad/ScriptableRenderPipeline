@@ -14,6 +14,12 @@ namespace UnityEditor.ShaderGraph
         [SerializeField]
         string m_GuidSerialized;
 
+        public Guid RewriteGuid()
+        {
+            m_Guid = Guid.NewGuid();
+            return m_Guid;
+        }
+
         [SerializeField]
         string m_Title;
 

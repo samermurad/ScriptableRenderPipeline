@@ -584,11 +584,6 @@ namespace UnityEditor.ShaderGraph
                 RemoveEdgeNoValidate(edge);
             }
 
-            foreach (var groupData in groups)
-            {
-                RemoveGroupNoValidate(groupData);
-            }
-
             foreach (var serializableNode in nodes)
             {
                 RemoveNodeNoValidate(serializableNode);
@@ -597,6 +592,11 @@ namespace UnityEditor.ShaderGraph
             foreach (var noteData in notes)
             {
                 RemoveNoteNoValidate(noteData);
+            }
+
+            foreach (var groupData in groups)
+            {
+                RemoveGroupNoValidate(groupData);
             }
 
             ValidateGraph();
