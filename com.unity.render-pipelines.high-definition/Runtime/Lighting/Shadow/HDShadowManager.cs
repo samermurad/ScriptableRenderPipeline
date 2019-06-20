@@ -157,7 +157,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             directionalShadowsDepthBits = k_DefaultShadowMapDepthBits,
             punctualLightShadowAtlas    = HDShadowAtlasInitParams.GetDefault(),
             areaLightShadowAtlas        = HDShadowAtlasInitParams.GetDefault(),
-			shadowQuality               = HDShadowQuality.Low,
+			shadowQuality               = HDShadowQuality.Medium,
             supportScreenSpaceShadows   = false,
             maxScreenSpaceShadows       = 2,
         };

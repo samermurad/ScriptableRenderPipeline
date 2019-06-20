@@ -8,7 +8,7 @@
 
 // We can't use multi_compile for compute shaders so we force the shadow algorithm
 #if (SHADERPASS == SHADERPASS_DEFERRED_LIGHTING || SHADERPASS == SHADERPASS_VOLUMETRIC_LIGHTING || SHADERPASS == SHADERPASS_VOLUME_VOXELIZATION)
-#define SHADOW_LOW 
+#define SHADOW_MEDIUM 
 #endif
 
 #ifdef SHADOW_LOW
@@ -275,7 +275,7 @@ float EvalShadow_PunctualDepth(HDShadowData sd, Texture2D tex, SamplerComparison
     // We need to do the check on min/max coordinates because if the shadow spot angle is smaller than the actual cone, then we could have artifacts due to the clamp sampler.
     float2 maxCoord = (sd.shadowMapSize.xy - 0.5f) * _ShadowAtlasSize.zw + sd.atlasOffset;
     float2 minCoord = sd.atlasOffset;
-    return any(posTC > maxCoord || posTC < minCoord) ? 1.0f : PUNCTUAL_FILTER_ALGORITHM(sd, positionSS, posTC, sampleBias, tex, samp);
+    return any(posTC.xy > maxCoord || posTC.xy < minCoord) ? 1.0f : PUNCTUAL_FILTER_ALGORITHM(sd, positionSS, posTC, sampleBias, tex, samp);
 }
 
 //
