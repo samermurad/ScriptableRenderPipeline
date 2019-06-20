@@ -499,7 +499,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                 cullingSphere.z -= cameraPos.z;
             }
 
-			shadowRequest.constantBias = GetDirectionalConstantBias(index, cullingSphere.w, viewportSize.x);
+			shadowRequest.constantBias = GetDirectionalConstantBias(requestIndex, cullingSphere.w, viewportSize.x);
             manager.UpdateCascade(requestIndex, cullingSphere, m_ShadowSettings.cascadeShadowBorders[requestIndex]);
         }
 
@@ -549,7 +549,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                         Vector2 shapeSize = new Vector2(shapeWidth, shapeHeight);
                         float offset = GetAreaLightOffsetForShadows(shapeSize, areaLightShadowCone);
                         Vector3 shadowOffset = offset * visibleLight.GetForward();
-                        HDShadowUtils.ExtractAreaLightData(hdCamera, visibleLight, lightTypeExtent, visibleLight.GetPosition() + shadowOffset, areaLightShadowCone, shadowNearPlane, shapeSize, viewportSize, m_ShadowData.normalBiasMax, out shadowRequest.view, out invViewProjection, out shadowRequest.deviceProjectionYFlip, out shadowRequest.deviceProjection, out shadowRequest.splitData);
+                        HDShadowUtils.ExtractAreaLightData(hdCamera, visibleLight, lightTypeExtent, visibleLight.GetPosition() + shadowOffset, areaLightShadowCone, shadowNearPlane, shapeSize, viewportSize, m_ShadowData.normalBias, out shadowRequest.view, out invViewProjection, out shadowRequest.deviceProjectionYFlip, out shadowRequest.deviceProjection, out shadowRequest.splitData);
                     }
                     else
                     {
@@ -559,7 +559,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                             case LightType.Point:
                                 HDShadowUtils.ExtractPointLightData(
                                     hdCamera, legacyLight.type, visibleLight, viewportSize, shadowNearPlane,
-                                    m_ShadowData.normalBiasMax, (uint)index, out shadowRequest.view,
+                                    m_ShadowData.normalBias, (uint)index, out shadowRequest.view,
                                     out invViewProjection, out shadowRequest.deviceProjectionYFlip,
                                     out shadowRequest.deviceProjection, out shadowRequest.splitData
                                 );
@@ -569,7 +569,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                                 float spotAngleForShadows = useCustomSpotLightShadowCone ? Math.Min(customSpotLightShadowCone, visibleLight.light.spotAngle)  : visibleLight.light.spotAngle;
                                 HDShadowUtils.ExtractSpotLightData(
                                     hdCamera, legacyLight.type, spotLightShape, spotAngleForShadows, shadowNearPlane, aspectRatio, shapeWidth,
-                                    shapeHeight, visibleLight, viewportSize, m_ShadowData.normalBiasMax,
+                                    shapeHeight, visibleLight, viewportSize, m_ShadowData.normalBias,
                                     out shadowRequest.view, out invViewProjection, out shadowRequest.deviceProjectionYFlip,
                                     out shadowRequest.deviceProjection, out shadowRequest.splitData
                                 );
