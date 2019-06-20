@@ -275,5 +275,5 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
 
     [Obsolete("DecalProjectorComponent have been renamed DecalProjector for API alignment", true)]
-    public partial class DecalProjectorComponent { }
+    public sealed class DecalProjectorComponent { }
 }
