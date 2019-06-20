@@ -23,6 +23,7 @@ struct HDShadowData
     float _pad1;
     float _pad2;
     float4 shadowFilterParams0;
+    float4 cacheTranslationDelta;
     float4x4 shadowToWorld;
 };
 
@@ -97,6 +98,10 @@ float Get_pad2(HDShadowData value)
 float4 GetShadowFilterParams0(HDShadowData value)
 {
     return value.shadowFilterParams0;
+}
+float4 GetCacheTranslationDelta(HDShadowData value)
+{
+    return value.cacheTranslationDelta;
 }
 float4x4 GetShadowToWorld(HDShadowData value)
 {

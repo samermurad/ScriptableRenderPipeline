@@ -35,6 +35,9 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
         public Vector4      shadowFilterParams0;
 
+        public Vector3      cacheTranslationDelta;
+        public float        _padding1;
+
         public Matrix4x4    shadowToWorld;
     }
 
@@ -97,6 +100,9 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         public float                maxDepthBias;
 
         public Vector4              evsmParams;
+
+        public bool         shouldUseCachedShadow = false;
+        public HDShadowData cachedShadowData;
     }
 
     public enum HDShadowQuality
@@ -143,7 +149,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             directionalShadowsDepthBits = k_DefaultShadowMapDepthBits,
             punctualLightShadowAtlas    = HDShadowAtlasInitParams.GetDefault(),
             areaLightShadowAtlas        = HDShadowAtlasInitParams.GetDefault(),
-			shadowQuality               = HDShadowQuality.Low,
+			shadowQuality               = HDShadowQuality.Medium,
             supportScreenSpaceShadows   = false,
             maxScreenSpaceShadows       = 2,
         };
@@ -355,6 +361,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             data.rot1 = new Vector3(view.m10, view.m11, view.m12);
             data.rot2 = new Vector3(view.m20, view.m21, view.m22);
             data.shadowToWorld = shadowRequest.shadowToWorld;
+            data.cacheTranslationDelta = new Vector3(0.0f, 0.0f, 0.0f);
+
 
             // Compute the scale and offset (between 0 and 1) for the atlas coordinates
             float rWidth = 1.0f / atlas.width;
@@ -428,7 +436,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             m_AreaLightShadowAtlas.Layout();
         }
 
-        unsafe public void PrepareGPUShadowDatas(CullingResults cullResults, Camera camera)
+        unsafe public void PrepareGPUShadowDatas(CullingResults cullResults, HDCamera camera)
         {
             int shadowIndex = 0;
 
@@ -446,7 +454,19 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                 {
                     atlas = m_AreaLightShadowAtlas;
                 }
-                m_ShadowDatas.Add(CreateShadowData(m_ShadowRequests[i], atlas));
+
+                HDShadowData shadowData;
+                if (m_ShadowRequests[i].shouldUseCachedShadow)
+                {
+                    shadowData = m_ShadowRequests[i].cachedShadowData;
+                }
+                else
+                {
+                    shadowData = CreateShadowData(m_ShadowRequests[i], atlas);
+                    m_ShadowRequests[i].cachedShadowData = shadowData;
+                }
+
+                m_ShadowDatas.Add(shadowData);
                 m_ShadowRequests[i].shadowIndex = shadowIndex++;
             }
 

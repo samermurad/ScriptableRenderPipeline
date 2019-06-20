@@ -8,7 +8,7 @@
 
 // We can't use multi_compile for compute shaders so we force the shadow algorithm
 #if (SHADERPASS == SHADERPASS_DEFERRED_LIGHTING || SHADERPASS == SHADERPASS_VOLUMETRIC_LIGHTING || SHADERPASS == SHADERPASS_VOLUME_VOXELIZATION)
-#define SHADOW_LOW 
+#define SHADOW_MEDIUM 
 #endif
 
 #ifdef SHADOW_LOW
@@ -136,12 +136,17 @@ float3 EvalShadow_ReceiverBias(float worldTexelSize, float normalBias, float3 po
 //
 float EvalShadow_PunctualDepth(HDShadowData sd, Texture2D tex, SamplerComparisonState samp, float2 positionSS, float3 positionWS, float3 normalWS, float3 L, float L_dist, bool perspective)
 {
+    positionWS = positionWS + sd.cacheTranslationDelta.xyz;
     /* bias the world position */
     positionWS = EvalShadow_ReceiverBias(sd.worldTexelSize, sd.normalBias, positionWS, normalWS, L, L_dist, perspective);
     /* get shadowmap texcoords */
     float3 posTC = EvalShadow_GetTexcoordsAtlas(sd, _ShadowAtlasSize.zw, positionWS, perspective);
+    
     /* sample the texture */
-    return PUNCTUAL_FILTER_ALGORITHM(sd, positionSS, posTC, tex, samp, sd.constantBias);
+    // We need to do the check on min/max coordinates because if the shadow spot angle is smaller than the actual cone, then we could have artifacts due to the clamp sampler.
+    float2 maxCoord = (sd.shadowMapSize.xy - 0.5f) * _ShadowAtlasSize.zw + sd.atlasOffset;
+    float2 minCoord = sd.atlasOffset;
+    return any(posTC.xy > maxCoord || posTC.xy < minCoord) ? 1.0f : PUNCTUAL_FILTER_ALGORITHM(sd, positionSS, posTC, tex, samp, sd.constantBias);
 }
 
 //
@@ -149,6 +154,8 @@ float EvalShadow_PunctualDepth(HDShadowData sd, Texture2D tex, SamplerComparison
 //
 float EvalShadow_AreaDepth(HDShadowData sd, Texture2D tex, float2 positionSS, float3 positionWS, float3 normalWS, float3 L, float L_dist, bool perspective)
 {
+    positionWS = positionWS + sd.cacheTranslationDelta.xyz;
+
     /* get shadowmap texcoords */
     float3 posTC = EvalShadow_GetTexcoordsAtlas(sd, _AreaShadowAtlasSize.zw, positionWS, perspective);
 
@@ -234,7 +241,8 @@ float EvalShadow_CascadedDepth_Blend(HDShadowContext shadowContext, Texture2D te
     {
         HDShadowData sd = shadowContext.shadowDatas[index];
         LoadDirectionalShadowDatas(sd, shadowContext, index + shadowSplitIndex);
-    
+        positionWS = positionWS + sd.cacheTranslationDelta.xyz;
+
         /* normal based bias */
         float3 orig_pos = positionWS;
         positionWS = EvalShadow_ReceiverBias(sd.worldTexelSize, sd.normalBias, positionWS, normalWS, L, 1.0, false);
