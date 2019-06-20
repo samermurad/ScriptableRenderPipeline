@@ -69,8 +69,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         // XR multipass and instanced views are supported (see XRSystem)
         XRPass m_XRPass;
         public XRPass xr { get { return m_XRPass; } }
-        ViewConstants[] xrViewConstants;
-        ComputeBuffer   xrViewConstantsGpu;
+        public ViewConstants[] xrViewConstants;
+        ComputeBuffer xrViewConstantsGpu;
 
         // Recorder specific
         IEnumerator<Action<RenderTargetIdentifier, CommandBuffer>> m_RecorderCaptureActions;
@@ -128,9 +128,6 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
         // Helper property to inform how many views are rendered simultaneously
         public int viewCount { get => Math.Max(1, xr.viewCount); }
-
-        // XRTODO: remove and replace occurences by viewCount
-        public int computePassCount { get => viewCount; }
 
         public bool clearDepth
         {
@@ -740,8 +737,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             frameIndex &= 1;
             var hdPipeline = (HDRenderPipeline)RenderPipelineManager.currentPipeline;
 
-            return rtHandleSystem.Alloc(Vector2.one, filterMode: FilterMode.Point, colorFormat: (GraphicsFormat)hdPipeline.currentPlatformRenderPipelineSettings.colorBufferFormat,
-                                        enableRandomWrite: true, useMipMap: true, autoGenerateMips: false, useDynamicScale: true, xrInstancing: true,
+            return rtHandleSystem.Alloc(Vector2.one, TextureXR.slices, colorFormat: (GraphicsFormat)hdPipeline.currentPlatformRenderPipelineSettings.colorBufferFormat,
+                                        dimension: TextureXR.dimension, enableRandomWrite: true, useMipMap: true, autoGenerateMips: false, useDynamicScale: true,
                                         name: string.Format("CameraColorBufferMipChain{0}", frameIndex));
         }
 
@@ -875,7 +872,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             // Since recorder does not know about this, we need to send a texture of the right size.
             cmd.GetTemporaryRT(m_RecorderTempRT, actualWidth, actualHeight, 0, FilterMode.Point, input.rt.graphicsFormat);
 
-            var blitMaterial = HDUtils.GetBlitMaterial(TextureDimension.Tex2D);
+            var blitMaterial = HDUtils.GetBlitMaterial(input.rt.dimension);
 
             var rtHandleScale = RTHandles.rtHandleProperties.rtHandleScale;
             Vector2 viewportScale = new Vector2(rtHandleScale.x, rtHandleScale.y);
