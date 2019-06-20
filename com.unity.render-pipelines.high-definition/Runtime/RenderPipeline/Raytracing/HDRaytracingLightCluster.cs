@@ -703,7 +703,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             {
                 HDProbe probeData = lights.reflectionProbeArray[lightIdx];
                 var envLightData = new EnvLightData();
-                m_RenderPipeline.GetEnvLightData(cmd, hdCamera, probeData, ref envLightData, m_RenderPipeline.m_CurrentDebugDisplaySettings);
+                m_RenderPipeline.GetEnvLightData(cmd, hdCamera, probeData, m_RenderPipeline.m_CurrentDebugDisplaySettings, ref envLightData);
 
                 // We make the light position camera-relative as late as possible in order
                 // to allow the preceding code to work with the absolute world space coordinates.

@@ -1470,7 +1470,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             }
         }
 
-        public bool GetEnvLightData(CommandBuffer cmd, HDCamera hdCamera, HDProbe probe, ref EnvLightData envLightData, DebugDisplaySettings debugDisplaySettings)
+        public bool GetEnvLightData(CommandBuffer cmd, HDCamera hdCamera, HDProbe probe, DebugDisplaySettings debugDisplaySettings, ref EnvLightData envLightData)
         {
             Camera camera = hdCamera.camera;
 
@@ -2148,7 +2148,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                         var probeWrapper = SelectProbe(probe, planarProbe);
 
                         EnvLightData envLightData = new EnvLightData();
-                        if (GetEnvLightData(cmd, hdCamera, probeWrapper, ref envLightData, debugDisplaySettings))
+                        if (GetEnvLightData(cmd, hdCamera, probeWrapper, debugDisplaySettings, ref envLightData))
                         {
                             // it has been filled
                             m_lightList.envLights.Add(envLightData);
@@ -2159,13 +2159,6 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
                             // We make the light position camera-relative as late as possible in order
                             // to allow the preceding code to work with the absolute world space coordinates.
-                            if (ShaderConfig.s_CameraRelativeRendering != 0)
-                            {
-                                // Caution: 'EnvLightData.positionRWS' is camera-relative after this point.
-                                envLightData.capturePositionRWS -= camPosWS;
-                                envLightData.influencePositionRWS -= camPosWS;
-                                envLightData.proxyPositionRWS -= camPosWS;
-                            }
                             UpdateEnvLighCameraRelativetData(ref envLightData, camPosWS);
 
                             int last = m_lightList.envLights.Count - 1;
